@@ -1,0 +1,2924 @@
+{
+	"info": {
+		"_postman_id": "813168bb-ddcd-4773-9d80-71b2524ca8a1",
+		"name": "ECS-Native",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9fb7866c-7027-4c02-983f-62a3d05fa54c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0b490bef-3484-4dfe-ae82-c4b4f62cf705",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "506389f1-0c32-4106-bb20-f6e760cba652",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"ecs_native_server_id\", jsonData.server.id);",
+							"",
+							"// Wait few seconds before executing next request",
+							"//setTimeout(function(){}, 80000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"server\": {\n\t\t\"name\": \"todelete_native_testAPI-ECS-{{$randomInt}}\",\n\t\t\"flavorRef\": \"{{flavor_type}}\",\n\t\t\"imageRef\": \"{{coreOS_1298_id}}\",\n\t\t\"networks\": [{\n\t\t\t\"uuid\": \"{{subnet_id_1}}\"\n\t\t}],\n\t\t\"availability_zone\": \"{{region}}a\",\n\t\t\"key_name\": \"{{key_name}}\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check ECS status",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "bab6838e-9ef0-4dea-bf91-0aedc44eb676",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"console.log(\"jsonData.server.status = \" + jsonData.server.status);",
+							"",
+							"if (jsonData.server.status === \"ACTIVE\") {",
+							"    console.log(\"ECS ready !!!\");",
+							"} else if (jsonData.server.status === \"BUILD\") {",
+							"    console.log(\"ECS not ready...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 5000);",
+							"    postman.setNextRequest(\"Check ECS status\");",
+							"} else {",
+							"    console.log(\"Job failed!\");",
+							"    postman.setNextRequest(null);",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Tags (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2.1/{{tenant_id}}/servers/{{ecs_native_server_id}}/tags",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.1",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"tags"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add a Single Tag (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"tags\": [\"1tag\"]\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2.1/{{tenant_id}}/servers/{{ecs_native_server_id}}/tags",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.1",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"tags"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Replace Tags (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"tags\": [\"testAPItag1\", \"testAPItag2\"]\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2.1/{{tenant_id}}/servers/{{ecs_native_server_id}}/tags",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.1",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"tags"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Tag Existence (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2.1/{{tenant_id}}/servers/{{ecs_native_server_id}}/tags/testAPItag1",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.1",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"tags",
+						"testAPItag1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a Single Tag (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2.1/{{tenant_id}}/servers/{{ecs_native_server_id}}/tags/testAPItag1",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.1",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"tags",
+						"testAPItag1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete All Tags (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2.1/{{tenant_id}}/servers/{{ecs_native_server_id}}/tags",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.1",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"tags"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying ECSs (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About ECSs (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/detail",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"detail"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying ECS Information (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "db502f57-241a-4be8-a2f6-5576cfb03dbb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"server\":{\r\n      \"name\":\"todelete_new_native_testAPI-ECS-{{$randomInt}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stopping an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "43d4c99e-170a-4c6f-8558-ae5903d200e1",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-stop\": {}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying the Specifications of an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "10764315-05e0-4b04-be9c-53d490e822fb",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 80000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"resize\" : {\r\n\"flavorRef\" : \"t2.small\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirming the Modification to the Specifications of an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0f67cab3-1fb9-4e58-80cd-726f6baecd40",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 80000);",
+							"postman.setNextRequest(\"Starting an ECS (Native)\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"confirmResize\" : null\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rolling Back the Modification to the Specifications of an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d6ff113f-e64c-4b91-b67e-10fb2c826125",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Conflict\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([409]);",
+							"});",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"revertResize\" : null\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Starting an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "81a5bce5-aaec-41a5-9cc4-b0f6441281dd",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 200000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-start\": {}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restarting an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0e8713bb-3603-421f-8ce4-f79ef18cfa38",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 70000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"reboot\": {\r\n\"type\": \"SOFT\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieving the Password of a Windows ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/os-server-password",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"os-server-password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting the Password of a Windows ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3b0a895f-210c-4a2b-8de8-d1549da8aa6c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/os-server-password",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"os-server-password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding a Security Group (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b8c8504c-cfad-4b4e-b812-26b5879a2631",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"addSecurityGroup\": {\r\n\"name\": \"Internet\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Removing a Security Group (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b8c8504c-cfad-4b4e-b812-26b5879a2631",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"removeSecurityGroup\": {\r\n\"name\": \"Internet\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Networks (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ba91a530-c0f4-4caf-a22d-9c63ba879d24",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-networks",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-networks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the ECS Network (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "330e607b-1506-4092-ac29-411cf530e706",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"var keys = Object.keys(jsonData.addresses);",
+							"pm.globals.set(\"ecs_native_network_label\", keys[0]);",
+							"",
+							"console.log(keys[0]);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/ips",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"ips"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Network of a Specified ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/ips/{{ecs_native_network_label}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"ips",
+						"{{ecs_native_network_label}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Security Groups (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-security-groups",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-security-groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Security Group (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e5b5f982-71d1-45f6-a00d-5076fddce94f",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"ecs_native_sg_id\", jsonData.security_group.id);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"security_group\": {\r\n\"name\": \"todelete_native_api_ecs-{{$randomInt}}\",\r\n\"description\": \"todelete test API ECS\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-security-groups",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-security-groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Security Group Details (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-security-groups/{{ecs_native_sg_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-security-groups",
+						"{{ecs_native_sg_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Security Group (Native)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-groups/{{ecs_native_sg_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-groups",
+						"{{ecs_native_sg_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Specifications of ECSs (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "91df09e7-8f01-42df-b0be-63df7aa34a2c",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"ecs_native_flavor_id\", jsonData.flavors[0].id);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/flavors/detail",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"flavors",
+						"detail"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Specifications of an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/flavors/{{ecs_native_flavor_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"flavors",
+						"{{ecs_native_flavor_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying NIC Information About ECSs (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0012c22-4767-49da-9e44-db489690407a",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"ecs_native_nic_port_id\", jsonData.interfaceAttachments[0].port_id);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/os-interface",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"os-interface"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying NIC Information About an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/os-interface/{{ecs_native_nic_port_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"os-interface",
+						"{{ecs_native_nic_port_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding an ECS NIC (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "3e4821d8-7a9c-444f-8a2e-6825026550fb",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"ecs_native_nic_port_id_02\", jsonData.interfaceAttachment.port_id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"interfaceAttachment\":{\r\n      \"fixed_ips\":[\r\n         {\r\n            \"ip_address\":\"192.168.1.236\"\r\n         }\r\n      ],\r\n      \"net_id\":\"{{subnet_id_1}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/os-interface",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"os-interface"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an ECS NIC (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3b0a895f-210c-4a2b-8de8-d1549da8aa6c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/os-interface/{{ecs_native_nic_port_id_02}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"os-interface",
+						"{{ecs_native_nic_port_id_02}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Information About the Disks Attached to an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "fb636e1c-f037-4fc5-8fbc-8b0e81cc4bd8",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"ecs_native_volume_id\", jsonData.volumeAttachments[0].volumeId);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/os-volume_attachments",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"os-volume_attachments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Information About a Disk Attached to an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/os-volume_attachments/{{ecs_native_volume_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"os-volume_attachments",
+						"{{ecs_native_volume_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an EVS Disk",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1da37b34-97a7-4b67-80e9-af2225d1ba3b",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"job_id\", jsonData.job_id);",
+							"setTimeout(function(){}, 6000); "
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"volume\": {\r\n     \"count\": 1,\r\n     \"description\": \"todelete_Test_API_EVS_01-{{$randomInt}}\",\r\n     \"availability_zone\": \"{{region}}a\",\r\n     \"size\": 10,\r\n     \"name\": \"todelete_Test_API_EVS_01\",\r\n     \"volume_type\": \"SATA\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudvolumes",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudvolumes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Job Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "53b39f71-e9fe-482b-a0b9-8c244b57f33f",
+						"exec": [
+							"pm.globals.unset(\"variable_key\");",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"",
+							"pm.globals.set(\"status\", jsonData.status);",
+							"if ( pm.variables.get(\"status\") == \"SUCCESS\") {",
+							"    console.log(\"status: SUCCESS \");",
+							"    pm.globals.set(\"volume_id\", jsonData.entities.volume_id);",
+							"    postman.setNextRequest(\"Attaching a Disk to an ECS (Native)\");",
+							"} else if (pm.variables.get(\"status\") == \"FAIL\") {",
+							"    console.log(\"status: FAIL \",jsonData);",
+							"    postman.setNextRequest(null);",
+							"    return;",
+							"} else {",
+							"    console.log(\"status: \", pm.variables.get(\"status\"));",
+							"    setTimeout(function(){}, 60000); ",
+							"    postman.setNextRequest(\"Querying the Job Status\");",
+							"} ",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{job_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Attaching a Disk to an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b8c8504c-cfad-4b4e-b812-26b5879a2631",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"volumeAttachment\": {\r\n\"volumeId\": \"{{volume_id}}\",\r\n\"device\": \"/dev/sdb\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/os-volume_attachments",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"os-volume_attachments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying ECS Metadata (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/metadata",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configuring ECS Metadata (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "db502f57-241a-4be8-a2f6-5576cfb03dbb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"metadata\": {\r\n\"key1\": \"testvalue1\"\r\n}}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/metadata",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating ECS Metadata (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b8c8504c-cfad-4b4e-b812-26b5879a2631",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"metadata\": {\r\n\"key1\": \"new_testvalue1\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/metadata",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Metadata of an ECS Key (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/metadata/key1",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"metadata",
+						"key1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying the Key Value in Metadata of an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "db502f57-241a-4be8-a2f6-5576cfb03dbb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"meta\": {\r\n\"key1\": \"new_newvalue\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/metadata/key1",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"metadata",
+						"key1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting Specified ECS Metadata (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3b0a895f-210c-4a2b-8de8-d1549da8aa6c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}/metadata/key1",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}",
+						"metadata",
+						"key1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying SSH Key Pairs (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-keypairs",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-keypairs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating and Importing an SSH Key Pair (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0473cdbf-d0c2-4fa4-a704-1eab1ac6177f",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"ecs_native_keypair_name\", jsonData.keypair.name);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"keypair\": {\r\n\"public_key\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+HavmuvtJx1/D88C2Pqeohyyemzm6dmVogFDc+27Wll1iL6lpqT21MbxfDSHN54NC98ODM625Lf8n+YTIov211KOS/sdYIUBFFrdaZYJImVmSXVdTHZFA6Y1yTpMFwwP6Doj12IT8Hbhr7Xf3D5hC/U0SJZpE0tYYp5GUF/MBNgkmgGjkz6Ms1tlwqhynt12VEWqAr/cULml6SBUoXHSz/z6dAUh53cjCiyHWsUmUdnAVxYv7g/8Wg+1wi7BAzWm7AWVnG1gOEqJMnH3YxKbtFx9IK2UVvEZoT98q2+xD/F3zVxMYIPOhFhrx3MYMv6rSnP55FxuiebjvJchPScpH Generated-by-Nova\\n\",\r\n\"type\": \"ssh\",\r\n\"name\": \"todelete_test_keypair-{{$randomInt}}\",\r\n\"user_id\": \"fake\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-keypairs",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-keypairs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying an SSH Key Pair (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0fdfca3-fa67-43bb-8ead-21b7a6a7bf33",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-keypairs/{{ecs_native_keypair_name}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-keypairs",
+						"{{ecs_native_keypair_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an SSH Key Pair (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3b0a895f-210c-4a2b-8de8-d1549da8aa6c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-keypairs/{{ecs_native_keypair_name}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-keypairs",
+						"{{ecs_native_keypair_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3b0a895f-210c-4a2b-8de8-d1549da8aa6c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_native_server_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_native_server_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "7ebffa53-e366-4a87-9390-218d096f3373",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "aa73c48e-9ae2-42f4-a0c9-4a813749af78",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"// Wait few seconds before executing next request",
+					"setTimeout(function(){}, 3000);"
+				]
+			}
+		}
+	]
+}

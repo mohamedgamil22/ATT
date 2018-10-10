@@ -1,0 +1,2131 @@
+{
+	"info": {
+		"_postman_id": "b1f9f91a-b31a-4214-b253-a357e2e9ece9",
+		"name": "EVS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET Project Scope Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a6f1b4ee-505f-4440-a476-ca847426950c",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an EVS Disk",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1da37b34-97a7-4b67-80e9-af2225d1ba3b",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"job_id\", jsonData.job_id);",
+							"setTimeout(function(){}, 6000); "
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"volume\": {\r\n     \"count\": 1,\r\n     \"description\": \"todelete_Test_API_EVS_01-{{$randomInt}}\",\r\n     \"availability_zone\": \"{{region}}a\",\r\n     \"size\": 10,\r\n     \"name\": \"todelete_Test_API_EVS_01\",\r\n     \"volume_type\": \"SATA\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudvolumes",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudvolumes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Job Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "53b39f71-e9fe-482b-a0b9-8c244b57f33f",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.unset(\"variable_key\");",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"",
+							"pm.globals.set(\"status\", jsonData.status);",
+							"if ( pm.variables.get(\"status\") == \"SUCCESS\") {",
+							"    console.log(\"status: SUCCESS \");",
+							"    pm.globals.set(\"volume_id\", jsonData.entities.volume_id);",
+							"    postman.setNextRequest(\"Creating an EVS Disk (Native OpenStack API)\");",
+							"} else if (pm.variables.get(\"status\") == \"FAIL\") {",
+							"    console.log(\"status: FAIL \",jsonData);",
+							"    postman.setNextRequest(null);",
+							"    return;",
+							"} else {",
+							"    console.log(\"status: \", pm.variables.get(\"status\"));",
+							"    setTimeout(function(){}, 60000); ",
+							"    postman.setNextRequest(\"Querying the Job Status\");",
+							"} ",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{job_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an EVS Disk (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0e127da4-8e0a-4ece-8afe-26d86b78289d",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"volume_id_Openstack\", jsonData.volume.id)",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"volume\": {\r\n\"name\": \"todelete_Test_API_EVS_Openstack_{{$randomInt}}\",\r\n\"description\": \"create for api test openstack\",\r\n\"volume_type\": \"SATA\",\r\n\"metadata\": {\r\n\"volume_owner\": \"openapi\"\r\n},\r\n\"size\": 10\r\n}\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Expanding the Capacity of an EVS Disk",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-extend\": {\r\n\"new_size\": 20\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudvolumes/{{volume_id}}/action",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudvolumes",
+						"{{volume_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Expanding an EVS Disk (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c1849dbf-4f74-4fa5-9597-097789435abc",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 60000); "
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-extend\": {\r\n\"new_size\": 20\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/action",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Attaching an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-attach\": {\r\n\"instance_uuid\": \"{{ecs_id_1}}\",\r\n\"mountpoint\": \"/dev/vdc\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/action",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Detaching an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-detach\": {\r\n\"instance_uuid\": \"{{ecs_id_1}}\",\r\n\"mountpoint\": \"/dev/vdc\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/action",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reserving an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-reserve\": { }\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/action",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Canceling Reservation of an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-unreserve\": { }\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/action",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configuring Bootable for an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-set_bootable\": {\r\n\"bootable\": true\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/action",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configuring Read-Only Attribute for an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-update_readonly_flag\": {\r\n\"readonly\": true\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/action",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an EVS Snapshot (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "53573da4-1656-41a1-bc5b-e079582a0e5f",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"snapshot_id_EVS\", jsonData.snapshot.id);",
+							"setTimeout(function(){}, 20000); "
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"snapshot\": {\r\n\"name\": \"todelete_Test-API-EVS-SNAP-{{$randomInt}}\",\r\n\"description\": \"Daily backup\",\r\n\"volume_id\": \"{{volume_id_Openstack}}\",\r\n\"force\": false,\r\n\"metadata\": {\r\n\"key1\": \"value1\"\r\n}\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating an EVS Snapshot (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "42017846-c31e-4fd6-8389-cc0815d6508c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"snapshot\": {\n\"name\": \"Test\",\n\"description\": \"Le nom a été modifié\"\n}\n}\n"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots/{{snapshot_id_EVS}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots",
+						"{{snapshot_id_EVS}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying EVS Snapshots (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f72a582-69bd-488f-8ae8-6b7f8cecd023",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"snapshot\": {\n\"name\": \"Test-API-EVS-snapshot-Rename\",\n\"description\": \"Le nom a été modifié\"\n}\n}\n"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About EVS Snapshots (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f72a582-69bd-488f-8ae8-6b7f8cecd023",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"snapshot\": {\n\"name\": \"Test-API-EVS-snapshot-Rename\",\n\"description\": \"Le nom a été modifié\"\n}\n}\n"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots/detail",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots",
+						"detail"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About a Single EVS Snapshot (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f72a582-69bd-488f-8ae8-6b7f8cecd023",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"snapshot\": {\n\"name\": \"Test-API-EVS-snapshot-Rename\",\n\"description\": \"Le nom a été modifié\"\n}\n}\n"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots/{{snapshot_id_EVS}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots",
+						"{{snapshot_id_EVS}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rolling Back a Snapshot to an EVS Disk",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c17f66a6-7b35-4abb-8e68-49b016d0a86c",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 60000); "
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"rollback\": {\n\"volume_id\": \"{{volume_id_Openstack}}\"\n}\n}\n"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/os-vendor-snapshots/{{snapshot_id_EVS}}/rollback",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"os-vendor-snapshots",
+						"{{snapshot_id_EVS}}",
+						"rollback"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding Metadata of an EVS Snapshot (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f72a582-69bd-488f-8ae8-6b7f8cecd023",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"metadata\": {\r\n\"key1\": \"value1\",\r\n\"key2\": \"value2\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots/{{snapshot_id_EVS}}/metadata",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots",
+						"{{snapshot_id_EVS}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Metadata of an EVS Snapshot (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f72a582-69bd-488f-8ae8-6b7f8cecd023",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots/{{snapshot_id_EVS}}/metadata",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots",
+						"{{snapshot_id_EVS}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating One Piece of EVS Snapshot Metadata (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f72a582-69bd-488f-8ae8-6b7f8cecd023",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"meta\": {\r\n\"key1\": \"value1\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots/{{snapshot_id_EVS}}/metadata/key1",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots",
+						"{{snapshot_id_EVS}}",
+						"metadata",
+						"key1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Metadata of an EVS Snapshot (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f72a582-69bd-488f-8ae8-6b7f8cecd023",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"metadata\": {\r\n\"key1\": \"value1\",\r\n\"key2\" : \"value22\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots/{{snapshot_id_EVS}}/metadata",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots",
+						"{{snapshot_id_EVS}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an EVS Snapshot (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d8ab9a1f-235c-4aa5-ae11-8ff43145724a",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots/{{snapshot_id_EVS}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots",
+						"{{snapshot_id_EVS}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating EVS Disk Information",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"volume\": {\"name\": \"test_volume\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudvolumes/{{volume_id}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudvolumes",
+						"{{volume_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating EVS Disk Information (Native OpenStack API)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"volume\": {\"name\": \"testvolume\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying EVS Disks",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudvolumes",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudvolumes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying EVS Disks (Native OpenStack API)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About All EVS Disks",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudvolumes/detail",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudvolumes",
+						"detail"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About All EVS Disks (Native OpenStack API)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/detail",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"detail"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About a Single EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About a Single EVS Disk (Native OpenStack API v1)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v1/{{project_id}}/volumes/{{volume_id_Openstack}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying EVS Disk Types (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "99b15d47-d63c-4184-9d9d-0b77c4f6576a",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.unset(\"variable_key\");",
+							"",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/types",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"types"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Quotas of a Tenant (Native OpenStack API)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/os-quota-sets/{{project_id}}?usage=True",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"os-quota-sets",
+						"{{project_id}}"
+					],
+					"query": [
+						{
+							"key": "usage",
+							"value": "True"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding Metadata of an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"metadata\": {\r\n\"key1\": \"value1\",\r\n\"key2\": \"value2\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/metadata",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Metadata of an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/metadata",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Metadata of an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"metadata\": {\r\n\"key1\": \"value1\",\r\n\"key2\": \"value2\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/metadata",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying One Piece of EVS Disk Metadata (Native OpenStack API)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/metadata/key1",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"metadata",
+						"key1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating One Piece of EVS Disk Metadata (Native OpenStack API)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"meta\": {\r\n\"key1\": \"value1\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/metadata/key1",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"metadata",
+						"key1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating One Piece of EVS Disk Metadata (Native OpenStack API) copy",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}/metadata/key1",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}",
+						"metadata",
+						"key1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying API Extensions (Native OpenStack API)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/extensions",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"extensions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Information About All AZs (Native OpenStack API)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/os-availability-zone",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"os-availability-zone"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying API Versions (Native OpenStack API)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying API Versions (Native OpenStack API v2)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"disabled": true
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an EVS Disk Transfer (Native OpenStack API v2)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c17a36cd-e27e-40c2-86dc-19d3490bb67e",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"transfer_id_Openstack\", jsonData.transfer.id);",
+							"pm.globals.set(\"transfer_auth_key_Openstack\", jsonData.transfer.auth_key);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"transfer\": {\r\n\"volume_id\": \"{{volume_id_Openstack}}\",\r\n\"name\": \"Test API request trasnfer\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-volume-transfer",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-volume-transfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details of an EVS Disk Transfer (Native OpenStack API v2)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"accept\": {\r\n\"auth_key\": \"{{transfer_auth_key_Openstack}}\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-volume-transfer/{{transfer_id_Openstack}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-volume-transfer",
+						"{{transfer_id_Openstack}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying All EVS Disk Transfers of a Tenant (Native OpenStack API v2)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"accept\": {\r\n\"auth_key\": \"{{transfer_auth_key_Openstack}}\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-volume-transfer",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-volume-transfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Accepting an EVS Disk Transfer (Native OpenStack API v2)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"accept\": {\r\n\"auth_key\": \"{{transfer_auth_key_Openstack}}\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-volume-transfer/{{transfer_id_Openstack}}/accept",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-volume-transfer",
+						"{{transfer_id_Openstack}}",
+						"accept"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an EVS Disk Transfer (Native OpenStack API v2) Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c17a36cd-e27e-40c2-86dc-19d3490bb67e",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"transfer_id_Openstack\", jsonData.transfer.id);",
+							"pm.globals.set(\"transfer_auth_key_Openstack\", jsonData.transfer.auth_key);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"transfer\": {\r\n\"volume_id\": \"{{volume_id_Openstack}}\",\r\n\"name\": \"Test API request trasnfer\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-volume-transfer",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-volume-transfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an EVS Disk Transfer (Native OpenStack API v2)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{tenant_id}}/os-volume-transfer/{{transfer_id_Openstack}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"os-volume-transfer",
+						"{{transfer_id_Openstack}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying EVS Disk Details by Service (v2)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cd1691d4-ecd4-4067-a1d6-3b95418168a0",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"transfer\": {\r\n\"volume_id\": \"{{volume_id_Openstack}}\",\r\n\"name\": \"Test API request trasnfer\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/os-vendor-volumes/detail",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"os-vendor-volumes",
+						"detail"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an EVS Disk",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudvolumes/{{volume_id}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudvolumes",
+						"{{volume_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an EVS Disk (Native OpenStack API)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/volumes/{{volume_id_Openstack}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"volumes",
+						"{{volume_id_Openstack}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "ebfea4e0-fce6-491c-a46d-4a0c0bd04f1a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "79d0241e-bb7e-4639-af3d-ac433b8352e4",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,300]);",
+					"});"
+				]
+			}
+		}
+	]
+}

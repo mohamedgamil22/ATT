@@ -1,0 +1,1870 @@
+{
+	"info": {
+		"_postman_id": "8cb814bb-1c4e-47c3-958e-02d15c0e8349",
+		"name": "VPC-Huawei",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9fb7866c-7027-4c02-983f-62a3d05fa54c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0b490bef-3484-4dfe-ae82-c4b4f62cf705",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a VPC",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "07fd181e-ec39-44e3-8615-2d4469ef9f8a",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"vpc_api_id_01\", jsonData.vpc.id);",
+							"pm.globals.set(\"vpc_api_name_01\", jsonData.vpc.name);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 10000);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"vpc\": {\r\n    \"name\": \"Test-API-VPC-toDelete-{{$randomInt}}\",\r\n    \"cidr\": \"172.16.0.0/24\"\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/vpcs",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"vpcs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying VPC Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8b776965-19f8-4f3e-a89a-8860685a73b1",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"VPC creation status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.vpc.status).to.eql(\"OK\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/vpcs/{{vpc_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"vpcs",
+						"{{vpc_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying VPCs",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/vpcs",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"vpcs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating VPC Information",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "69af5ac2-dd53-4979-a02a-31f07bb42e10",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"vpc_api_name_01\", jsonData.vpc.name);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"vpc\": {\r\n    \"name\": \"Test-API-VPC-new-toDelete-{{$randomInt}}\",\r\n    \"cidr\": \"172.16.0.0/24\"\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/vpcs/{{vpc_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"vpcs",
+						"{{vpc_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Subnet",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ab4e8039-c9de-49c2-b149-837fc855d365",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"subnet_api_id_01\", jsonData.subnet.id);",
+							"pm.globals.set(\"subnet_api_name_01\", jsonData.subnet.name);",
+							"pm.globals.set(\"port_subnet_id_01\", jsonData.subnet.neutron_subnet_id);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 2000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"subnet\":\r\n  {\r\n    \"name\": \"Test-API-Subnet-toDelete-{{$randomInt}}\",\r\n    \"cidr\": \"172.16.0.0/24\",\r\n    \"gateway_ip\": \"172.16.0.1\",\r\n    \"dhcp_enable\": \"true\",\r\n    \"primary_dns\": \"114.114.114.114\",\r\n    \"secondary_dns\": \"114.114.115.115\",\r\n    \"dnsList\": [\r\n      \"114.114.114.114\",\r\n      \"114.114.115.115\"\r\n    ],\r\n    \"availability_zone\":\"eu-west-0a\",\r\n    \"vpc_id\":\"{{vpc_api_id_01}}\"\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/subnets",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"subnets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Subnet Details",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/subnets/{{subnet_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"subnets",
+						"{{subnet_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Subnets",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/subnets",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"subnets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Subnet Information",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "87f17ae3-0d10-4ec8-a1ed-7c287a2bb54a",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"subnet_api_name_01\", jsonData.subnet.name);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 2000);",
+							"",
+							"pm.test(\"Subnet update status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.subnet.status).to.eql(\"ACTIVE\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"subnet\": {\r\n    \"name\": \"Test-API-Subnet-new-toDelete-{{$randomInt}}\",\r\n    \"dhcp_enable\": \"false\",\r\n    \"primary_dns\": \"8.8.8.8\",\r\n    \"secondary_dns\": \"9.9.9.9\"\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/vpcs/{{vpc_api_id_01}}/subnets/{{subnet_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"vpcs",
+						"{{vpc_api_id_01}}",
+						"subnets",
+						"{{subnet_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applying for a Private IP Address",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "3951a604-b217-4390-b843-f80fa802e71f",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"vpc_privateip_api_id_01\", jsonData.privateips[0].id);",
+							"pm.globals.set(\"vpc_privateip_api_address_01\", jsonData.privateips[0].ip_address);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 10000);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"privateips\":[\r\n      {\r\n         \"subnet_id\":\"{{subnet_api_id_01}}\",\r\n         \"ip_address\":\"172.16.0.2\"\r\n      }\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/privateips",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"privateips"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Private IP Address Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "df253ce4-2aa2-4499-805e-379be3dfb574",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/privateips/{{vpc_privateip_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"privateips",
+						"{{vpc_privateip_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Private IP Addresses",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ac876f65-0833-4ab0-8006-914e06767e86",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/subnets/{{subnet_api_id_01}}/privateips",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"subnets",
+						"{{subnet_api_id_01}}",
+						"privateips"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a VPC Peering Connection",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0d30715f-c22f-4850-96fc-6eb547ed9819",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"peering_id\", jsonData.peering.id);",
+							"console.log(\"peering_id: \", pm.variables.get(\"peering_id\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"peering\":{\r\n      \"name\":\"todelete-test-api-peering-{{$randomInt}}\",\r\n      \"request_vpc_info\":{\r\n         \"vpc_id\":\"{{vpc_api_id_01}}\"\r\n      },\r\n      \"accept_vpc_info\":{\r\n         \"vpc_id\":\"e843a4c9-5b5d-42a5-989e-07a3017a2ae4\"\r\n      }\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/peerings",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"peerings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying VPC Peering Connections",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/peerings",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"peerings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a VPC Peering Connection",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8021eecc-95ef-46ae-8703-14cdd836221b",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Updating a VPC Peering Connection\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/peerings/{{peering_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"peerings",
+						"{{peering_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Accepting a VPC Peering Connection KO",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/peerings/{{peering_id}}/accept",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"peerings",
+						"{{peering_id}}",
+						"accept"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refusing a VPC Peering Connection KO",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/peerings/{{peering_id}}/reject",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"peerings",
+						"{{peering_id}}",
+						"reject"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a VPC Peering Connection",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c48e7403-de35-4fca-a3cc-1a3f6f88517d",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"peering\":{\r\n      \"name\":\"todelete-newtest-api-peering-{{$randomInt}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/peerings/{{peering_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"peerings",
+						"{{peering_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a VPC Route",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "09d7fe63-9342-4f4b-89e9-30398d887251",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"vpc_route_id\", jsonData.route.id);",
+							"console.log(\"vpc_route_id: \", pm.variables.get(\"vpc_route_id\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"route\":{\r\n      \"type\":\"peering\",\r\n      \"nexthop\":\"{{peering_id}}\",\r\n      \"destination\":\"172.16.1.0/24\",\r\n      \"vpc_id\":\"{{vpc_api_id_01}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/routes",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying VPC Routes",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/routes",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a VPC Route",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/routes/{{vpc_route_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"routes",
+						"{{vpc_route_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Security Group",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "4ffcc9a3-89c1-4dcc-bc07-2463f889601f",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"vpc_api_sg_id_01\", jsonData.security_group.id);",
+							"pm.globals.set(\"vpc_api_sg_name_01\", jsonData.security_group.name);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 10000);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"security_group\":{\r\n      \"name\":\"todelete_apitest_sg-{{$randomInt}}\",\r\n      \"description\":\"test api security group\",\r\n      \"vpc_id\":\"{{vpc_api_id_01}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/security-groups",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"security-groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Security Group Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "61640ee6-5707-40db-9b1e-719fcf48000b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/security-groups/{{vpc_api_sg_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"security-groups",
+						"{{vpc_api_sg_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Security Groups",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "61640ee6-5707-40db-9b1e-719fcf48000b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/security-groups",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"security-groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Security Group",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-groups/{{vpc_api_sg_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-groups",
+						"{{vpc_api_sg_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Quotas",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/quotas?type=vpc",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"quotas"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "vpc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applying for an Elastic IP Address",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f8ebd94b-5697-4360-8efd-5176d3813321",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"publicip_id\", jsonData.publicip.id);",
+							"pm.globals.set(\"publicip_address\", jsonData.publicip.public_ip_address);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 5000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"publicip\": {\r\n    \"type\": \"5_bgp\"\r\n  },\r\n  \"bandwidth\": {\r\n    \"name\": \"bandwidth123\",\r\n    \"size\": 10,\r\n    \"share_type\": \"PER\"\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/publicips",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"publicips"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Elastic IP Address Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cbaf8b0f-b7ad-4d08-8da9-43b02e760ff4",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"bandwidth_api_id_01\", jsonData.publicip.bandwidth_id);",
+							"pm.globals.set(\"bandwidth_api_name_01\", jsonData.publicip.bandwidth_name);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 5000);",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/publicips/{{publicip_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"publicips",
+						"{{publicip_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Elastic IP Addresses",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/publicips?limit=10",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"publicips"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Elastic IP Address Information - bind",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"publicip\": {\r\n\"port_id\": \"{{ecs_1_NIC_id}}\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/publicips/{{publicip_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"publicips",
+						"{{publicip_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Elastic IP Address Information - unbind",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"publicip\": {\r\n\"port_id\": \"\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/publicips/{{publicip_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"publicips",
+						"{{publicip_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Bandwidth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1c3a88ee-dc03-4aca-8d9b-2de9d929ac50",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/bandwidths/{{bandwidth_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"bandwidths",
+						"{{bandwidth_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Bandwidths",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1c3a88ee-dc03-4aca-8d9b-2de9d929ac50",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/bandwidths",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"bandwidths"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Bandwidth Information",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "41898a08-602e-4054-a9fd-5b42dc0141f7",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"bandwidth\":{\r\n      \"name\":\"bandwidth123\",\r\n      \"size\":100\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/bandwidths/{{bandwidth_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"bandwidths",
+						"{{bandwidth_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an Elastic IP Address",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/publicips/{{publicip_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"publicips",
+						"{{publicip_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a VPC Route",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/routes/{{vpc_route_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"routes",
+						"{{vpc_route_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a VPC Peering Connection",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/vpc/peerings/{{peering_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"vpc",
+						"peerings",
+						"{{peering_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Private IP Address",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7d51aa7b-4072-4ed3-8ae0-489c9af613f6",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/privateips/{{vpc_privateip_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"privateips",
+						"{{vpc_privateip_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Subnet",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "aca373d5-7598-454c-96e7-4fc86893c62f",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 2000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/vpcs/{{vpc_api_id_01}}/subnets/{{subnet_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"vpcs",
+						"{{vpc_api_id_01}}",
+						"subnets",
+						"{{subnet_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a VPC",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7d51aa7b-4072-4ed3-8ae0-489c9af613f6",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/vpcs/{{vpc_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"vpcs",
+						"{{vpc_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "e9cd21b5-e576-40e6-a4c6-21488c6763bb",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "f8f7247c-f1ed-4c06-a13a-85bdfe8d71bf",
+				"type": "text/javascript",
+				"exec": [
+					"//tests[\"Response time is acceptable\"] = responseTime < 500; // milliseconds",
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"// Wait few seconds before executing next request",
+					"setTimeout(function(){}, 4000);"
+				]
+			}
+		}
+	]
+}

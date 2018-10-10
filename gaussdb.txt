@@ -1,0 +1,48 @@
+# --- INSTALL and UPGRADE ---
+# Service group username and group name,it need to create before the DMK install.
+user_name: onframework
+group_name: onframework
+gaussdb_install_path: /opt/gaussdb
+#please keep the standbyIp and floatIP with the empty values if you perform a single node installation.
+primaryIp: 10.72.17.32
+standbyIp: 10.72.17.33
+floatIp: 10.72.17.31
+
+# --- JUST FIRST INSTALL ---
+# Database backup file naming, which is used to distinguish the database backup files from service files stored on the UDS.
+# The name format is recommended to be [Service name+DB].
+service_name_db: cloud_db
+# Database user for the application to use, as default. If there is a change, please inform.
+db_user: onframework
+# The password of database user,pease input the encrypt word with pwswitch tool,otherwise it will use the default user password.
+db_pd: U2FsdGVkX1/fJcrlbUmKKhz6P1Pj6r7QauE1pKofW7I=
+# Database name for the application to use.
+db_name_one: console
+# Second database name. If the second database is not required, keep this value empty.
+db_name_another: keypairs
+
+# Version and installation path.
+version: 1.1.9
+gaussdb_port: 2345
+
+# If the Gauss database source file is located in the proper path (as follows), the following variables do not need to be modified.
+# Gauss source path: /pkg_repo/3rd/GaussdbHA/{{version}}/gaussdb-ha-release-{{version}}.tar.gz
+package_type: 3rd
+package_name: GaussdbHA
+source_storage: /pkg_repo/{{ package_type }}
+#/pkg_repo/{{ package_type }}
+gaussdb_source_path: "{{ package_name }}/{{ version }}"
+# "{{ package_name }}/{{ version }}"
+gaussdb_pkg_name: gaussdb-ha-release-{{ version }}.tar.gz
+local_storage_path: /home/tmpHAStorePath
+
+# primary-standby config, must be right,haMode is 1 or 2,1 means single node install, 2 means it will be installed as HA Cluster mode,the default installation is HA Mode.
+haMode: 2
+primaryHostName:
+
+ep^jkzefôfjzdpojpzefu VSHOXVP28CDA032
+standbyHostName: VSHOXVP28CDA033
+netMask: 255.255.255.0
+gateWay: 10.72.17.1
+primaryItf: eth0
+standbyItf: eth0

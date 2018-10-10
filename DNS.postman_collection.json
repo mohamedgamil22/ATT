@@ -1,0 +1,1114 @@
+{
+	"info": {
+		"_postman_id": "13c4705e-8a9f-439b-916b-90d89a0d608b",
+		"name": "DNS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1ac5a488-b975-4311-a2d8-5a0bb8d28cf7",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Response is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"if (pm.response.code !== 201) {",
+							"    postman.setNextRequest(null);",
+							"} else {",
+							"    pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying All Record Sets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0a99b5fd-6d2e-4cf1-9d57-31671d8a0f98",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(\"Querying All Record Sets\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/recordsets?zone_type=private",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"recordsets"
+					],
+					"query": [
+						{
+							"key": "zone_type",
+							"value": "private"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the DNS Version",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "359fe974-63eb-4c5d-a4b3-158c7bc7d34f",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(\"Querying the DNS Version\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying all zones",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "030b5166-4602-442d-8f32-39fafe5011f2",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(\"Querying zones (all)\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying public zones limited to 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1ce426c0-e799-4bd0-ac91-5115421bc701",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(\"Querying public zones (limit to 1)\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"preprod.org.\", \"description\": \"Test public zone creation.\", \"zone_type\": \"public\", \"email\": \"ncastel.ext@orange.com\" }"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones?type=public&limit=1",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "public"
+						},
+						{
+							"key": "limit",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get VPC id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "abee2ddb-84cb-4416-b355-763bc67549d4",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.variables.set(\"vpc_id\", jsonData.id);",
+							"",
+							"console.log(\"vpc_id\", pm.variables.get(\"vpc_id\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"preprod.org.\", \"description\": \"Test public zone creation.\", \"zone_type\": \"public\", \"email\": \"ncastel.ext@orange.com\" }"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/vpcs",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"vpcs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create public zone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fe0af9c6-c86d-4f3a-905a-f4f3ffc1e7ed",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(\"Creating a public zone\");",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"public_zone_id\", jsonData.id);",
+							"",
+							"console.log(\"Public zone id: \", pm.variables.get(\"public_zone_id\"));",
+							"",
+							"// Wait 3 seconds before executing next request",
+							"setTimeout(function(){}, 3000);",
+							"",
+							"",
+							"",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"public.preprod.org.\", \"description\": \"Test public zone creation.\", \"zone_type\": \"public\", \"email\": \"ncastel.ext@orange.com\" }"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Public Zone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cd86b6f1-1c95-4c03-994f-22ca8fa16273",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"preprod.org.\", \"description\": \"Test public zone creation.\", \"zone_type\": \"public\", \"email\": \"ncastel.ext@orange.com\" }"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{public_zone_id}}",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{public_zone_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Name Servers in a Public Zone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cd86b6f1-1c95-4c03-994f-22ca8fa16273",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"preprod.org.\", \"description\": \"Test public zone creation.\", \"zone_type\": \"public\", \"email\": \"ncastel.ext@orange.com\" }"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{public_zone_id}}/nameservers",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{public_zone_id}}",
+						"nameservers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete public zone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "688a0709-5be6-4536-9c71-cde414fa0b30",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"preprod.org.\", \"description\": \"Test public zone creation.\", \"zone_type\": \"public\", \"email\": \"ncastel.ext@orange.com\" }"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{public_zone_id}}",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{public_zone_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create private zone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "262395a9-face-48b6-8c38-b955dd2f4ab8",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(\"Create private zone\");",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"private_zone_id\", jsonData.id);",
+							"",
+							"// Wait 5 seconds before executing next request",
+							"setTimeout(function(){}, 5000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"name\": \"private.preprod.org.\",\n\"description\": \"Test private zone creation.\",\n\"zone_type\": \"private\",\n\"email\": \"ncastel.ext@orange.com\",\n\"router\": {\n\"router_id\": \"{{vpc_id_1}}\",\n\"router_region\": \"{{region}}\"\n}\n}\n\n\n"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Associating a Private Zone with a VPC",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6701545d-667d-40fc-8d7e-060b4188d1bf",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait 3 seconds before executing next request",
+							"setTimeout(function(){}, 3000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"router\": {\n\"router_id\": \"{{vpc_id_2}}\",\n\"router_region\": \"{{region}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{private_zone_id}}/associaterouter",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{private_zone_id}}",
+						"associaterouter"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Disassociating a VPC from a Private Zone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3335987c-5e61-41d6-a441-d5d32bf082c2",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"router\": {\n\"router_id\": \"{{vpc_id_2}}\",\n\"router_region\": \"{{region}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{private_zone_id}}/disassociaterouter",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{private_zone_id}}",
+						"disassociaterouter"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Private Zone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3335987c-5e61-41d6-a441-d5d32bf082c2",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"preprod.org.\", \"description\": \"Test public zone creation.\", \"zone_type\": \"public\", \"email\": \"ncastel.ext@orange.com\" }"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{private_zone_id}}",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{private_zone_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Private Zones",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3335987c-5e61-41d6-a441-d5d32bf082c2",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"preprod.org.\", \"description\": \"Test public zone creation.\", \"zone_type\": \"public\", \"email\": \"ncastel.ext@orange.com\" }"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones?type=private",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "private"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Name Servers in a Private Zone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cd86b6f1-1c95-4c03-994f-22ca8fa16273",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"preprod.org.\", \"description\": \"Test public zone creation.\", \"zone_type\": \"public\", \"email\": \"ncastel.ext@orange.com\" }"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{private_zone_id}}/nameservers",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{private_zone_id}}",
+						"nameservers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Record Set",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d48983f5-7073-41f5-b72d-2e7becd05521",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(\"Creating a record set in private zone\");",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"recordset_id\", jsonData.id);",
+							"",
+							"console.log(\"Recordset id: \", pm.variables.get(\"recordset_id\"));",
+							"",
+							"// Wait 5 seconds before executing next request",
+							"setTimeout(function(){}, 5000);",
+							"",
+							"",
+							"",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"name\": \"Test-API.private.preprod.org.\",\n\"description\": \"This recordset has been created during API tests.\",\n\"type\": \"A\",\n\"ttl\": 3600,\n\"records\": [\n\"192.168.10.1\",\n\"192.168.10.2\"\n]\n}"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{private_zone_id}}/recordsets",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{private_zone_id}}",
+						"recordsets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Record Set",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "95bf4b81-099d-460f-9a98-8148e933e656",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"name\": \"Test-API.private.preprod.org.\",\n\"description\": \"This recordset has been created during API tests.\",\n\"type\": \"A\",\n\"ttl\": 3600,\n\"records\": [\n\"192.168.10.1\",\n\"192.168.10.2\"\n]\n}"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{private_zone_id}}/recordsets/{{recordset_id}}",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{private_zone_id}}",
+						"recordsets",
+						"{{recordset_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying All Record Sets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "95bf4b81-099d-460f-9a98-8148e933e656",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"name\": \"Test-API.private.preprod.org.\",\n\"description\": \"This recordset has been created during API tests.\",\n\"type\": \"A\",\n\"ttl\": 3600,\n\"records\": [\n\"192.168.10.1\",\n\"192.168.10.2\"\n]\n}"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/recordsets?zone_type=private",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"recordsets"
+					],
+					"query": [
+						{
+							"key": "zone_type",
+							"value": "private"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Record Set",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "38ef325e-6f21-4f99-ab2d-89dbb6dddd8c",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait a few seconds before executing next request",
+							"setTimeout(function(){}, 5000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"description\": \"This recordset has been updated during API tests.\",\n\"ttl\": 7200,\n\"records\": [\n\"192.168.200.10\",\n\"192.168.200.20\"\n]\n}"
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{private_zone_id}}/recordsets/{{recordset_id}}",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{private_zone_id}}",
+						"recordsets",
+						"{{recordset_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Record Set",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "363fcb50-dc87-4e19-b2a9-7e2115dc8627",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{private_zone_id}}/recordsets/{{recordset_id}}",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{private_zone_id}}",
+						"recordsets",
+						"{{recordset_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete private zone",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "86ef1c87-4c39-4e9c-b19e-ef9ac174f5c8",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dns.{{base_url}}/v2/zones/{{private_zone_id}}",
+					"protocol": "https",
+					"host": [
+						"dns",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"zones",
+						"{{private_zone_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "2a084f3c-3b75-424b-af0c-b138aa207b5f",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "cc3cc675-e6a4-4e44-8d3c-fc95b1c3182e",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Check return code is 200,201,202 or 204\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"if (pm.response.code != 200 && pm.response.code != 201 && pm.response.code != 202 && pm.response.code != 204) {",
+					"    console.log(\"url: \" + request.url);",
+					"    console.log(\"body: \" + request.data);",
+					"    console.log(\"responseBody: \" + responseBody)",
+					"}"
+				]
+			}
+		}
+	]
+}

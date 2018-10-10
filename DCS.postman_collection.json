@@ -1,0 +1,1414 @@
+{
+	"info": {
+		"_postman_id": "1a8ec883-2dcf-4e9c-8c94-77fc63c97779",
+		"name": "DCS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Authentication Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "05ca6596-3416-4bdc-8653-91d46f9b1349",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"var jsonData = JSON.parse(responseBody);",
+							"console.log(\"project_id: \" + jsonData.token.project.id);",
+							"pm.globals.set (\"project_id\", jsonData.token.project.id);",
+							"",
+							"postman.setNextRequest(\"Querying AZ Information\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying AZ Information",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4fd46c29-5067-4a43-b537-00c7c745f75d",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"    ",
+							"console.log(\"available zone list: \" + responseBody);",
+							"console.log(\"choose the first az for test, available_zone:\" + jsonData.available_zones[0].id);",
+							"pm.globals.set(\"dcs_available_zone\", jsonData.available_zones[0].id);",
+							"",
+							"",
+							"postman.setNextRequest(\"Querying Service Specifications\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/availableZones",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"availableZones"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Service Specifications",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "49dbfd94-3ae4-4ad6-a42b-cf6f6290d122",
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"check single_node\"] = responseBody.has(\"dcs.single_node\");",
+							"tests[\"check master_slave\"] = responseBody.has(\"dcs.master_standby\");",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"dcs_single_product_id\", jsonData.products[1].product_id);",
+							"pm.globals.set(\"dcs_master_standby_id\", jsonData.products[0].product_id);",
+							"",
+							"",
+							"postman.setNextRequest(\"Creating a Single DCS Instance\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/products",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Single DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ed108802-09f2-40b5-9bf7-5d7e157befbb",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"dcs_instance_id\", jsonData.instance_id);",
+							"",
+							"setTimeout(function(){}, 120000);",
+							"postman.setNextRequest(\"Creating a Master Standby DCS Instance\");",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "04957d96-6f02-4055-ba65-d5e9b93432e5",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"dcs_instance_password\", \"Hkl_jlkzjr@hfue\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n\"name\" : \"todelete-dcs-single-apitest-{{$randomInt}}\",\r\n\"description\" : \"Create an instance for api testing\",\r\n\"engine\" : \"Redis\",\r\n\"engine_version\" : \"3.0.7\",\r\n\"capacity\" : 2,\r\n\"password\" : \"Hkl_jlkzjr@hfue\",\r\n\"vpc_id\" : \"{{vpc_id_1}}\",\r\n\"security_group_id\" : \"{{security_group_default_id}}\",\r\n\"subnet_id\" : \"{{subnet_id_1}}\",\r\n\"available_zones\" : [\"{{dcs_available_zone}}\"],\r\n\"product_id\" : \"{{dcs_single_product_id}}\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Master Standby DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3a3b022c-bc9a-47e6-b750-913a86110599",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"dcs_instance_master_standby_id\", jsonData.instance_id);",
+							"",
+							"setTimeout(function(){}, 600000);",
+							"postman.setNextRequest(\"Querying a DCS Instance\");",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "27cc3f9e-4a1c-482c-9239-62d462113dfc",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n\"name\" : \"todelete-dcs-mas-stb-apitest-{{$randomInt}}\",\r\n\"description\" : \"Create an master standby instance for api testing\",\r\n\"engine\" : \"Redis\",\r\n\"engine_version\" : \"3.0.7\",\r\n\"capacity\" : 2,\r\n\"password\" : \"Hkl_jlkzjr@hfue\",\r\n\"vpc_id\" : \"{{vpc_id_1}}\",\r\n\"security_group_id\" : \"{{security_group_default_id}}\",\r\n\"subnet_id\" : \"{{subnet_id_1}}\",\r\n\"available_zones\" : [\"{{dcs_available_zone}}\"],\r\n\"product_id\" : \"{{dcs_master_standby_id}}\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d2481fd3-165e-4eba-a994-ab4f88311bdc",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"DCS instance creation\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"RUNNING\");",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"if (jsonData.status === \"CREATING\") {",
+							"        setTimeout(function(){}, 60000);",
+							"        postman.setNextRequest('Querying a DCS Instance');",
+							"} else if (jsonData.status === \"RUNNING\") {",
+							"        postman.setNextRequest(\"Modifying Information About a DCS Instance\");",
+							"} else {",
+							"        tests[postman.getEnvironmentVariable(\"dcs_instance_id\")+\" status: \"+jsonData.status] = false;",
+							"        postman.setNextRequest(\"Modifying Information About a DCS Instance\");",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying Information About a DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "35e096c9-751a-45d6-904b-c7cea430cf47",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 60000);",
+							"postman.setNextRequest(\"Scaling Up a DCS Instance\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n    \"name\": \"todelete-new-single-dcs-apitest-{{$randomInt}}\",  \r\n    \"description\": \"change instance description\"  \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Scaling Up a DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4a814e4f-6a7b-4f32-b5dc-1c0635c5a3ed",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 300000);",
+							"postman.setNextRequest(\"Querying Statistics of All DCS Instances\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"new_capacity\": 4\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_id}}/extend",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_id}}",
+						"extend"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Statistics of All DCS Instances",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3d40ae9f-352e-4de2-afb2-d9fa19d38eb5",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Querying DCS Instance Configurations\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/statistic",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"statistic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying DCS Instance Configurations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9fafb75c-dda0-4aeb-9f52-0650443179bd",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Querying the Number of DCS Instances in Different Status\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"redis_config\": [\r\n        {\r\n            \"param_id\": \"1\",\r\n            \"param_name\": \"timeout\",\r\n            \"param_value\": \"100\"\r\n        }\r\n    ]\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_id}}/configs",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_id}}",
+						"configs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Number of DCS Instances in Different Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0f327850-5cba-43ab-9047-60a2bb67193d",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Modifying DCS Instance Configurations\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/status?includeFailure=true",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"status"
+					],
+					"query": [
+						{
+							"key": "includeFailure",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying DCS Instance Configurations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9b9ebd26-89bd-4252-9195-781a25c17651",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 60000);",
+							"postman.setNextRequest(\"Stop DCS Instance\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"redis_config\": [\r\n        {\r\n            \"param_id\": \"1\",\r\n            \"param_name\": \"timeout\",\r\n            \"param_value\": \"1000\"\r\n        }\r\n    ]\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_id}}/configs",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_id}}",
+						"configs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stop DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "908cd8bb-9ab0-436c-84c2-4508b39d7fd0",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"DCS stop instance\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.results[0].result).to.eql(\"success\");",
+							"});",
+							"",
+							"setTimeout(function(){}, 120000);",
+							"postman.setNextRequest(\"Start DCS Instance\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"action\" : \"stop\", \r\n    \"instances\" : [\"{{dcs_instance_id}}\"] \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/status",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e23bc946-6041-4a76-a518-0422c1273b26",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"DCS start instance\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.results[0].result).to.eql(\"success\");",
+							"});",
+							"",
+							"setTimeout(function(){}, 120000);",
+							"postman.setNextRequest(\"Restart DCS Instance\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"action\" : \"start\", \r\n    \"instances\" : [\"{{dcs_instance_id}}\"] \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/status",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restart DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0dbf4de4-2172-4880-a4c7-38677fdba377",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"DCS restart instance\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.results[0].result).to.eql(\"success\");",
+							"});",
+							"",
+							"setTimeout(function(){}, 120000);",
+							"postman.setNextRequest(\"Changing the Password of a DCS Instance\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"action\" : \"restart\", \r\n    \"instances\" : [\"{{dcs_instance_id}}\"] \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/status",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Changing the Password of a DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c7479668-8a75-4d1a-8eb3-81b17ccd63a7",
+						"type": "text/javascript",
+						"exec": [
+							"    var jsonData = JSON.parse(responseBody);",
+							"    tests[\"check result\"] = jsonData.result === \"success\";",
+							"    ",
+							"setTimeout(function(){}, 60000);",
+							"postman.setNextRequest(\"Backing Up a DCS Instance\");",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "077288fa-5a01-4e4d-ab3c-0c3c5695d2b5",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"dcs_instance_new_password\", \"Ilm_kmlaks@igvf\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"old_password\": \"{{dcs_instance_password}}\", \r\n    \"new_password\": \"{{dcs_instance_new_password}}\" \r\n} \r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_id}}/password",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_id}}",
+						"password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Backing Up a DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5915b384-2f3c-4bd0-a63f-ab99b58fd561",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"dcs_instance_backup_id\", jsonData.backup_id);",
+							"",
+							"setTimeout(function(){}, 240000);",
+							"postman.setNextRequest(\"Restoring a DCS Instance\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"remark\": \"Backup instances\" \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_master_standby_id}}/backups",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_master_standby_id}}",
+						"backups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restoring a DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "70ba0fd1-ec17-4cb5-a8bc-586d6d1457d5",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"dcs_instance_restore_id\", jsonData.restore_id);",
+							"",
+							"setTimeout(function(){}, 240000);",
+							"postman.setNextRequest(\"Querying DCS Instance Backup Records\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"remark\":\"restore instance\", \r\n    \"backup_id\":\"{{dcs_instance_backup_id}}\" \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_master_standby_id}}/restores",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_master_standby_id}}",
+						"restores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying DCS Instance Backup Records",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "86a03127-307e-40d2-8e72-3f85b0f4148c",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Querying DCS Instance Restore Records\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_master_standby_id}}/backups",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_master_standby_id}}",
+						"backups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying DCS Instance Restore Records",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f774ccda-ba17-4afc-a6be-a9051239b5f9",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Deleting Backup Files\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_master_standby_id}}/restores",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_master_standby_id}}",
+						"restores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting Backup Files",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a1ececd9-8792-41d9-8277-3808af2b9afe",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 30000);",
+							"postman.setNextRequest(\"Querying All DCS Instances of a Tenant\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_master_standby_id}}/backups/{{dcs_instance_backup_id}}",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_master_standby_id}}",
+						"backups",
+						"{{dcs_instance_backup_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying All DCS Instances of a Tenant",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e8905ba0-eb8b-49e0-b02a-eb91717590c7",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying the Quota of a Tenant\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Quota of a Tenant",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4cf657b0-5dd8-4008-9cc5-d8280b2cacd2",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Querying Maintenance Time Windows\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/quota",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"quota"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Maintenance Time Windows",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dd67dbc6-df7f-4672-8338-e7ff114543ff",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Deleting a Single DCS Instance\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/instances/maintain-windows",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"instances",
+						"maintain-windows"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Single DCS Instance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fe2e2b30-25b0-4bb8-b879-c2e79e8933c4",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 60000);",
+							"postman.setNextRequest(\"Batch Deleting DCS Instances\");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances/{{dcs_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances",
+						"{{dcs_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Batch Deleting DCS Instances",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2e9ebad1-f327-4186-b228-d9a0ee6cf4b1",
+						"type": "text/javascript",
+						"exec": [
+							"    var jsonData = JSON.parse(responseBody);",
+							"    tests[\"check result\"] = jsonData.results[0].result === \"success\";",
+							"    ",
+							"setTimeout(function(){}, 60000);",
+							"postman.setNextRequest(null);",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"instances\": [ \r\n        \"{{dcs_instance_master_standby_id}}\" \r\n    ] \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dcs.{{region}}.{{base_url}}/v1.0/{{project_id}}/instances?allFailure=false",
+					"protocol": "https",
+					"host": [
+						"dcs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"instances"
+					],
+					"query": [
+						{
+							"key": "allFailure",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "95ce2a92-aac8-4a3d-ac65-d23a03176ff9",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "bf0db801-bce6-47f8-8bf9-bab785220180",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"setTimeout(function(){}, 1000);"
+				]
+			}
+		}
+	]
+}

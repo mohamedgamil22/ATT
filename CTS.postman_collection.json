@@ -1,0 +1,455 @@
+{
+	"info": {
+		"_postman_id": "173f4fd3-0fdd-41b2-86af-415c098535fd",
+		"name": "CTS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9fb7866c-7027-4c02-983f-62a3d05fa54c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "aca35a2e-4a9f-4fa2-be96-943199df3003",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Creating a Tracker\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Tracker",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "03089c1b-f0b8-4906-aab8-1a70a549e06f",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"cts_tracker_name\", jsonData.tracker_name);",
+							"",
+							"console.log(\"cts_tracker_name: \", pm.variables.get(\"cts_tracker_name\"));",
+							"",
+							"postman.setNextRequest(\"Modifying a Tracker - disable\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"bucket_name\" : \"test-api-cts-pro\",\r\n\"file_prefix_name\" : \"test_api_cts_\"\r\n}"
+				},
+				"url": {
+					"raw": "https://cts.{{region}}.{{base_url}}/v1.0/{{project_id}}/tracker",
+					"protocol": "https",
+					"host": [
+						"cts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"tracker"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Tracker - disable",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0e9a3905-17b8-4b96-b9e7-4a0e9f5a073c",
+						"exec": [
+							"postman.setNextRequest(\"Modifying a Tracker - enable\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n \"bucket_name\" : \"{{cts-bucket}}\",\r\n \"file_prefix_name\" : \"testTrackerModification1\",\r\n \"status\" : \"disabled\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://cts.{{region}}.{{base_url}}/v1.0/{{project_id}}/tracker/{{cts_tracker_name}}",
+					"protocol": "https",
+					"host": [
+						"cts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"tracker",
+						"{{cts_tracker_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Tracker - enable",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6c31fe50-c893-411d-be85-68145b26c58a",
+						"exec": [
+							"postman.setNextRequest(\"Querying a Tracker\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n \"bucket_name\" : \"{{cts-bucket}}\",\r\n \"file_prefix_name\" : \"testTrackerModification2\",\r\n \"status\" : \"enabled\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://cts.{{region}}.{{base_url}}/v1.0/{{project_id}}/tracker/{{cts_tracker_name}}",
+					"protocol": "https",
+					"host": [
+						"cts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"tracker",
+						"{{cts_tracker_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Tracker",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "454a7b56-9702-470b-8f83-7c9928d9db2e",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Traces - by service_type\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n \"bucket_name\" : \"defaultbucket\",\r\n \"file_prefix_name\" : \"testtrackerCreation\"\r\n}"
+				},
+				"url": {
+					"raw": "https://cts.{{region}}.{{base_url}}/v1.0/{{project_id}}/tracker?tracker_name={{cts_tracker_name}}",
+					"protocol": "https",
+					"host": [
+						"cts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"tracker"
+					],
+					"query": [
+						{
+							"key": "tracker_name",
+							"value": "{{cts_tracker_name}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Traces - by service_type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4fb7de82-1e50-41a3-8c93-b7a082b9b6d3",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Traces - by trace_status\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n \"bucket_name\" : \"defaultbucket\",\r\n \"file_prefix_name\" : \"testtrackerCreation\"\r\n}"
+				},
+				"url": {
+					"raw": "https://cts.{{region}}.{{base_url}}/v2.0/{{project_id}}/{{cts_tracker_name}}/trace?service_type=CTS",
+					"protocol": "https",
+					"host": [
+						"cts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"{{project_id}}",
+						"{{cts_tracker_name}}",
+						"trace"
+					],
+					"query": [
+						{
+							"key": "service_type",
+							"value": "CTS"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Traces - by trace_status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0c2667a2-509b-448a-b403-1b660e0e114e",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a Tracker\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n \"bucket_name\" : \"defaultbucket\",\r\n \"file_prefix_name\" : \"testtrackerCreation\"\r\n}"
+				},
+				"url": {
+					"raw": "https://cts.{{region}}.{{base_url}}/v2.0/{{project_id}}/{{cts_tracker_name}}/trace?trace_status=warning",
+					"protocol": "https",
+					"host": [
+						"cts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"{{project_id}}",
+						"{{cts_tracker_name}}",
+						"trace"
+					],
+					"query": [
+						{
+							"key": "trace_status",
+							"value": "warning"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Tracker",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b3b20707-ba0b-4f52-a39f-376fdd9f6ce3",
+						"exec": [
+							"postman.setNextRequest(null);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cts.{{region}}.{{base_url}}/v1.0/{{project_id}}/tracker?tracker_name={{cts_tracker_name}}",
+					"protocol": "https",
+					"host": [
+						"cts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"tracker"
+					],
+					"query": [
+						{
+							"key": "tracker_name",
+							"value": "{{cts_tracker_name}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "60c52046-8639-48e5-8e14-aafb1ba13436",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "6589bd0e-781c-4c3f-b056-3db24809ec6b",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"// Wait few seconds before executing next request",
+					"setTimeout(function(){}, 8000);"
+				]
+			}
+		}
+	]
+}

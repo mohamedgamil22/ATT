@@ -1,0 +1,3939 @@
+{
+	"info": {
+		"_postman_id": "7174bca2-551c-435f-969d-db80af0f77e8",
+		"name": "OBS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d0fc6480-d59f-4e4f-a324-385bfac661c0",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"//postman.setNextRequest(\"Adding Monitoring Data\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3454d89d-f159-4885-9fb0-0a10aef1eb5f",
+						"exec": [
+							"pm.globals.set(\"bucket_name\", postman.getResponseHeader(\"Location\").substring(1));",
+							"",
+							"console.log(\"bucket_name: \", pm.variables.get(\"bucket_name\"));",
+							"",
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					},
+					{
+						"key": "x-default-storage-class",
+						"value": "STANDARD_IA",
+						"description": "There are three storage\nclasses: STANDARD (OBS Standard), STANDARD_IA (OBS Warm), and GLACIER\n(OBS Cold)."
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/test-api-obs-{{$timestamp}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"test-api-obs-{{$timestamp}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket for Logging",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f931cf99-063f-40f8-b348-9eacc850a0a6",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"logging_bucket_name\", postman.getResponseHeader(\"Location\").substring(1));",
+							"",
+							"console.log(\"logging_bucket_name: \", pm.variables.get(\"logging_bucket_name\"));",
+							"",
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "eu-west-0",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					},
+					{
+						"key": "x-default-storage-class",
+						"value": "STANDARD",
+						"description": "There are three storage\nclasses: STANDARD (OBS Standard), STANDARD_IA (OBS Warm), and GLACIER\n(OBS Cold)."
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}.logging",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}.logging"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Buckets",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?prefix=p&delimiter=d&max-keys=10&marker=m",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "prefix",
+							"value": "p"
+						},
+						{
+							"key": "delimiter",
+							"value": "d"
+						},
+						{
+							"key": "max-keys",
+							"value": "10"
+						},
+						{
+							"key": "marker",
+							"value": "m"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket Object Versions",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?versions=&prefix=p&key-marker=d&max-keys=10&marker=m",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "versions",
+							"value": ""
+						},
+						{
+							"key": "prefix",
+							"value": "p"
+						},
+						{
+							"key": "key-marker",
+							"value": "d"
+						},
+						{
+							"key": "max-keys",
+							"value": "10"
+						},
+						{
+							"key": "marker",
+							"value": "m"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Multipart Uploads",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?uploads=&max-uploads=2&prefix=p&delimiter=d&key-marker=10&upload-id-marker=m",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "uploads",
+							"value": ""
+						},
+						{
+							"key": "max-uploads",
+							"value": "2"
+						},
+						{
+							"key": "prefix",
+							"value": "p"
+						},
+						{
+							"key": "delimiter",
+							"value": "d"
+						},
+						{
+							"key": "key-marker",
+							"value": "10"
+						},
+						{
+							"key": "upload-id-marker",
+							"value": "m"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Head Bucket",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "HEAD",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket Location",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?location=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "location",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket Storage",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?storageinfo=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "storageinfo",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket Quota",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<Quota xmlns=\"http://obs.example.com/doc/2015-06-30/\">\r\n<StorageQuota>100000000</StorageQuota>\r\n</Quota>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?quota=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "quota",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket Quota",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?quota=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "quota",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket ACL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<AccessControlPolicy>\r\n   <Owner>\r\n      <ID>{{domain_id}}</ID>\r\n      <DisplayName>{{domain_name}}</DisplayName>\r\n   </Owner>\r\n   <AccessControlList>\r\n      <Grant>\r\n         <Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"CanonicalUser\">\r\n            <ID>{{domain_id}}</ID>\r\n            <DisplayName>{{domain_name}}</DisplayName>\r\n         </Grantee>\r\n         <Permission>FULL_CONTROL</Permission>\r\n      </Grant>\r\n      <Grant>\r\n         <Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"Group\">\r\n            <URI>http://acs.amazonaws.com/groups/s3/LogDelivery</URI>\r\n         </Grantee>\r\n         <Permission>FULL_CONTROL</Permission>\r\n      </Grant>\r\n   </AccessControlList>\r\n</AccessControlPolicy>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{logging_bucket_name}}?acl=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{logging_bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "acl",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket ACL",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?acl=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "acl",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket Logging",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<BucketLoggingStatus xmlns=\"http://obs.example.com/doc/2015-06-30/\">\r\n   <LoggingEnabled>\r\n      <TargetBucket>{{logging_bucket_name}}</TargetBucket>\r\n      <TargetPrefix>access_log</TargetPrefix>\r\n      <TargetGrants>\r\n         <Grant>\r\n            <Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"CanonicalUser\">\r\n               <ID>{{domain_id}}</ID>\r\n               <DisplayName>{{domain_name}}</DisplayName>\r\n            </Grantee>\r\n            <Permission>FULL_CONTROL</Permission>\r\n         </Grant>\r\n      </TargetGrants>\r\n   </LoggingEnabled>\r\n</BucketLoggingStatus>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?logging=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "logging",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket Logging",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?logging=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "logging",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"Id\":\"Policy1375342051334\",\r\n   \"Statement\":[\r\n      {\r\n         \"Sid\":\"Stmt1375240018061\",\r\n         \"Action\":[\r\n            \"s3:GetBucketLogging\"\r\n         ],\r\n         \"Effect\":\"Allow\",\r\n         \"Resource\":\"arn:aws:s3:::{{bucket_name}}\",\r\n         \"Principal\":{\r\n            \"AWS\":[\r\n               \"arn:aws:iam::{{domain_id}}:root\"\r\n            ]\r\n         }\r\n      }\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?policy=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "policy",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket Policy",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?policy=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "policy",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Bucket Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?policy=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "policy",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket Lifecycle",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "6b881954-1ce6-4af0-9d64-b7c04f926fc5",
+						"exec": [
+							"// MD5 digest of the content",
+							"var md5digest = CryptoJS.MD5(request.data);",
+							"var base64md5 = CryptoJS.enc.Base64.stringify(md5digest);",
+							"",
+							"console.log(\"md5digest: \", pm.variables.get(\"md5digest\"));",
+							"console.log(\"base64md5: \", pm.variables.get(\"base64md5\"));",
+							"",
+							"// Set headers for the signature hash",
+							"var sigHeaders = {",
+							"    'content-md5' : base64md5",
+							"};",
+							"",
+							"// Set Postman environment variables for the headers",
+							"pm.globals.set('content-md5', base64md5);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					},
+					{
+						"key": "Content-MD5",
+						"value": "{{content-md5}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<LifecycleConfiguration>\r\n   <Rule>\r\n      <ID>test-api-obs-lifecycle-id</ID>\r\n      <Prefix>test/</Prefix>\r\n      <Status>Enabled</Status>\r\n      <Expiration>\r\n         <Days>2</Days>\r\n      </Expiration>\r\n      <NoncurrentVersionExpiration>\r\n         <NoncurrentDays>5</NoncurrentDays>\r\n      </NoncurrentVersionExpiration>\r\n   </Rule>\r\n</LifecycleConfiguration>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?lifecycle=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "lifecycle",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket Lifecycle",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?lifecycle=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "lifecycle",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Bucket Lifecycle",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7fb8a9ef-aed4-46f3-87f0-44b866bbdfa1",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?lifecycle=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "lifecycle",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket Website",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0d482037-ce76-4c49-94d6-da68daf7e558",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<WebsiteConfiguration>\r\n   <IndexDocument>\r\n      <Suffix>index.html</Suffix>\r\n   </IndexDocument>\r\n   <ErrorDocument>\r\n      <Key>Error.html</Key>\r\n   </ErrorDocument>\r\n   <RoutingRules>\r\n      <RoutingRule>\r\n         <Condition>\r\n            <KeyPrefixEquals>docs/</KeyPrefixEquals>\r\n         </Condition>\r\n         <Redirect>\r\n            <ReplaceKeyPrefixWith>documents/</ReplaceKeyPrefixWith>\r\n         </Redirect>\r\n      </RoutingRule>\r\n   </RoutingRules>\r\n</WebsiteConfiguration>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?website=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "website",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket Website",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?website=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "website",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Bucket Website",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0d482037-ce76-4c49-94d6-da68daf7e558",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?website=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "website",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket Versioning",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0d482037-ce76-4c49-94d6-da68daf7e558",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<VersioningConfiguration>\r\n   <Status>Enabled</Status>\r\n</VersioningConfiguration>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?versioning=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "versioning",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket Versioning",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "eu-west-0",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?versioning",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "versioning",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket CORS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "8e0c6787-6790-45ca-be65-1f77d4c2c253",
+						"exec": [
+							"// MD5 digest of the content",
+							"var md5digest_CORS = CryptoJS.MD5(request.data);",
+							"var base64md5_CORS = CryptoJS.enc.Base64.stringify(md5digest_CORS);",
+							"",
+							"console.log(\"md5digest_CORS: \", pm.variables.get(\"md5digest_CORS\"));",
+							"console.log(\"base64md5_CORS: \", pm.variables.get(\"base64md5_CORS\"));",
+							"",
+							"// Set headers for the signature hash",
+							"var sigHeaders = {",
+							"    'content-md5' : base64md5_CORS",
+							"};",
+							"",
+							"// Set Postman environment variables for the headers",
+							"pm.globals.set('content-md5_CORS', base64md5_CORS);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					},
+					{
+						"key": "Content-MD5",
+						"value": "{{content-md5_CORS}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<CORSConfiguration>\r\n   <CORSRule>\r\n      <AllowedMethod>POST</AllowedMethod>\r\n      <AllowedMethod>GET</AllowedMethod>\r\n      <AllowedMethod>HEAD</AllowedMethod>\r\n      <AllowedMethod>PUT</AllowedMethod>\r\n      <AllowedMethod>DELETE</AllowedMethod>\r\n      <AllowedOrigin>obs.example.com</AllowedOrigin>\r\n      <AllowedOrigin>www.example.com</AllowedOrigin>\r\n      <AllowedHeader>AllowedHeader_1</AllowedHeader>\r\n      <AllowedHeader>AllowedHeader_2</AllowedHeader>\r\n      <MaxAgeSeconds>100</MaxAgeSeconds>\r\n      <ExposeHeader>ExposeHeader_1</ExposeHeader>\r\n      <ExposeHeader>ExposeHeader_2</ExposeHeader>\r\n   </CORSRule>\r\n</CORSConfiguration>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?cors=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "cors",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Bucket CORS",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?cors=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "cors",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Bucket CORS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0d482037-ce76-4c49-94d6-da68daf7e558",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?cors=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "cors",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Bucket Notification KO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "af04f662-7af3-490a-a645-889ad7db3a8a",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<NotificationConfiguration>\r\n   <Id>Id001</Id>\r\n   <Topic>urn:smn:southchina:35667523564:topic001</Topic>\r\n   <Event>s3:ObjectCreated:*</Event>\r\n   <Filter>\r\n      <S3Key>\r\n         <FilterRule>\r\n            <Name>prefix</Name>\r\n            <Value>smn/</Value>\r\n         </FilterRule>\r\n         <FilterRule>\r\n            <Name>suffix</Name>\r\n            <Value>.jpg</Value>\r\n         </FilterRule>\r\n      </S3Key>\r\n   </Filter>\r\n</NotificationConfiguration>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?notification=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "notification",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Options Bucket",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "af04f662-7af3-490a-a645-889ad7db3a8a",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "OPTIONS",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					},
+					{
+						"key": "Origin",
+						"value": "www.example.com"
+					},
+					{
+						"key": "Access-Control-Request-Method",
+						"value": "GET"
+					},
+					{
+						"key": "Access-Control-Request-Headers",
+						"value": "AllowedHeader_2"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "Access-Control-Request-Method:HEAD\r\nAccess-Control-Request-Headers:acc_header_1\r\nAccess-Control-Request-Headers:acc_header_2"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Object",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "b173e1ae-3edf-47df-bcf8-b2e931f16551",
+						"exec": [
+							"pm.globals.set(\"obs_object_name\", \"to_delete_tes-api-obs-object-01\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "123456789012345678901234567"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post Object KO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "bce5fea2-1db4-464c-aa32-b65ebf4281d8",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "multipart/form-data;boundary=----7db143f50da2"
+					},
+					{
+						"key": "Origin",
+						"value": "www.example.com"
+					},
+					{
+						"key": "Access-Control-Request-Headers",
+						"value": "AllowedHeader_2"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "-----------------------------7db143f50da2\r\nContent-Disposition: form-data; name=\"key\"\r\nobject01\r\n-----------------------------7db143f50da2\r\nContent-Disposition: form-data; name=\"acl\"\r\npublic-read\r\n-----------------------------7db143f50da2\r\nContent-Disposition: form-data; name=\"content-type\"\r\ntext/plain\r\n-----------------------------7db143f50da2\r\nContent-Disposition: form-data; name=\"expires\"\r\n1000\r\n-----------------------------7db143f50da2\r\nContent-Disposition: form-data; name=\"AWSAccessKeyId\"\r\n14RZT432N80TGDF2Y2G2\r\n-----------------------------7db143f50da2\r\nContent-Disposition: form-data; name=\"policy\"\r\newogICJleHBpcmF0aW9uIjogIjIwMTItMDEtMDFUMTI6MDA6MDAuMDAwWiIsCiAgImNvbmRpdGlvbnMiOi\r\nBbCiAgICB7ImJ1Y2tldCI6ICJ0Yy5wb3N0LmV4cGlyZXMuMDAxIiB9LAogICAgeyJhY2wiOiAicHVibGlj\r\nLXJlYWQiIH0sCiAgICB7IkV4cGlyZXMiOiAiMTAwMCIgfSwKICAgIFsiZXEiLCAiJGtleSIsICJvYmplY3\r\nQwMSJdLAogICAgWyJzdGFydHMtd2l0aCIsICIkQ29udGVudC1UeXBlIiwgInRleHQvIl0sCiAgXQp9Cg==\r\n-----------------------------7db143f50da2\r\nContent-Disposition: form-data; name=\"signature\"\r\nVk6rwO0Nq09BLhvNSIYwSJTRQ+k=\r\n-----------------------------7db143f50da2\r\nContent-Disposition: form-data; name=\"submit\"\r\nUpload\r\n-----------------------------7db143f50da2\r\nContent-Disposition: form-data; name=\"file\"; filename=\"MyFilename\"\r\nContent-Type: text/plain\r\n01234567890\r\n-----------------------------7db143f50da2--"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Object",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Object - Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0d315d49-d53d-41f6-b997-ddee60b82ee1",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "x-amz-copy-source",
+						"value": "{{bucket_name}}/tes-api-obs-object01"
+					},
+					{
+						"key": "x-amz-metadata-directive",
+						"value": "COPY"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}-copy",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}-copy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Object",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e9e8c935-bfca-429c-9a44-e2761d4106b8",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Multiple Objects",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "dd46ea9d-7535-4b74-a9b0-6411f7e8484c",
+						"exec": [
+							"// MD5 digest of the content",
+							"var md5digest_DELETE = CryptoJS.MD5(request.data);",
+							"var base64md5_DELETE = CryptoJS.enc.Base64.stringify(md5digest_DELETE);",
+							"",
+							"console.log(\"md5digest_DELETE: \", pm.variables.get(\"md5digest_DELETE\"));",
+							"console.log(\"base64md5_DELETE: \", pm.variables.get(\"base64md5_DELETE\"));",
+							"",
+							"// Set headers for the signature hash",
+							"var sigHeaders = {",
+							"    'content-md5' : base64md5_DELETE",
+							"};",
+							"",
+							"// Set Postman environment variables for the headers",
+							"pm.globals.set('content-md5_DELETE', base64md5_DELETE);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-MD5",
+						"value": "{{content-md5_DELETE}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<Delete>\r\n   <Quiet>true</Quiet>\r\n   <Object>\r\n      <Key>{{obs_object_name}}</Key>\r\n   </Object>\r\n   <Object>\r\n      <Key>{{obs_object_name}}-copy</Key>\r\n   </Object>\r\n</Delete>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}?delete=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					],
+					"query": [
+						{
+							"key": "delete",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Head Object",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "HEAD",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Object ACL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<AccessControlPolicy>\r\n   <Owner>\r\n      <ID>{{domain_id}}</ID>\r\n      <DisplayName>{{domain_name}}</DisplayName>\r\n   </Owner>\r\n   <AccessControlList>\r\n      <Grant>\r\n         <Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"CanonicalUser\">\r\n            <ID>{{domain_id}}</ID>\r\n            <DisplayName>{{domain_name}}</DisplayName>\r\n         </Grantee>\r\n         <Permission>FULL_CONTROL</Permission>\r\n      </Grant>\r\n      <Grant>\r\n         <Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"Group\">\r\n            <URI>http://acs.amazonaws.com/groups/s3/LogDelivery</URI>\r\n         </Grantee>\r\n         <Permission>FULL_CONTROL</Permission>\r\n      </Grant>\r\n   </AccessControlList>\r\n</AccessControlPolicy>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}?acl=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					],
+					"query": [
+						{
+							"key": "acl",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Object ACL",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}?acl=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					],
+					"query": [
+						{
+							"key": "acl",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Initiate Multipart Upload",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "58cb4d8e-c2c4-4d6b-888f-6fdc65486e9a",
+						"exec": [
+							"var xmlTree = xml2Json(responseBody);",
+							"",
+							"pm.globals.set(\"UploadId\", xmlTree.InitiateMultipartUploadResult.UploadId);",
+							"",
+							"console.log(\"UploadId: \", pm.variables.get(\"UploadId\"));",
+							"console.log(xmlTree);",
+							"",
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}?uploads=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					],
+					"query": [
+						{
+							"key": "uploads",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Part",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1209c995-6bc3-4bb1-8e72-601a386573ee",
+						"exec": [
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ccdfc1b9-2fad-46fd-8d4a-c1b76a156d87",
+						"exec": [
+							"// MD5 digest of the content",
+							"var md5digest_UPLOAD = CryptoJS.MD5(request.data);",
+							"var base64md5_UPLOAD = CryptoJS.enc.Base64.stringify(md5digest_UPLOAD);",
+							"",
+							"console.log(\"md5digest_UPLOAD: \", pm.variables.get(\"md5digest_UPLOAD\"));",
+							"console.log(\"base64md5_UPLOAD: \", pm.variables.get(\"base64md5_UPLOAD\"));",
+							"",
+							"// Set headers for the signature hash",
+							"var sigHeaders = {",
+							"    'content-md5' : base64md5_UPLOADE",
+							"};",
+							"",
+							"// Set Postman environment variables for the headers",
+							"pm.globals.set('content-md5_UPLOAD', base64md5_UPLOAD);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					},
+					{
+						"key": "Content-MD5",
+						"value": "{{content-md5_UPLOAD}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}?partNumber=1&uploadId={{UploadId}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					],
+					"query": [
+						{
+							"key": "partNumber",
+							"value": "1"
+						},
+						{
+							"key": "uploadId",
+							"value": "{{UploadId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Part - Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1209c995-6bc3-4bb1-8e72-601a386573ee",
+						"exec": [
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "89a1b3aa-209b-45d6-881e-5461f34d363e",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					},
+					{
+						"key": "x-amz-copy-source",
+						"value": "/{{bucket_name}}/tes-api-obs-object01"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}-copy?partNumber=1&uploadId={{UploadId}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}-copy"
+					],
+					"query": [
+						{
+							"key": "partNumber",
+							"value": "1"
+						},
+						{
+							"key": "uploadId",
+							"value": "{{UploadId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Parts",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d73ac27f-26d5-44ba-80f6-87ad67ecd9dd",
+						"exec": [
+							"//postman.setNextRequest(\"Get Metrics\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<AccessControlPolicy>\r\n   <Owner>\r\n      <ID>{{domain_id}}</ID>\r\n      <DisplayName>{{domain_name}}</DisplayName>\r\n   </Owner>\r\n   <AccessControlList>\r\n      <Grant>\r\n         <Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"CanonicalUser\">\r\n            <ID>{{domain_id}}</ID>\r\n            <DisplayName>{{domain_name}}</DisplayName>\r\n         </Grantee>\r\n         <Permission>FULL_CONTROL</Permission>\r\n      </Grant>\r\n      <Grant>\r\n         <Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"Group\">\r\n            <URI>http://acs.amazonaws.com/groups/s3/LogDelivery</URI>\r\n         </Grantee>\r\n         <Permission>FULL_CONTROL</Permission>\r\n      </Grant>\r\n   </AccessControlList>\r\n</AccessControlPolicy>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}?uploadId={{UploadId}}&max-parts=3&part-number-marker=1",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					],
+					"query": [
+						{
+							"key": "uploadId",
+							"value": "{{UploadId}}"
+						},
+						{
+							"key": "max-parts",
+							"value": "3"
+						},
+						{
+							"key": "part-number-marker",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Complete Multipart Upload",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1209c995-6bc3-4bb1-8e72-601a386573ee",
+						"exec": [
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "f443fcd8-36e9-4dc5-b2ef-81fb39a82226",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<CompleteMultipartUpload>\r\n<Part>\r\n<PartNumber>partNum1</PartNumber>\r\n<ETag>etag1</ETag>\r\n</Part>\r\n<Part>\r\n<PartNumber>partNum2</PartNumber>\r\n<ETag>etag2</ETag>\r\n</Part>\r\n<Part>\r\n<PartNumber>partNum3</PartNumber>\r\n<ETag>etag3</ETag>\r\n</Part>\r\n</CompleteMultipartUpload>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}?uploadId={{UploadId}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					],
+					"query": [
+						{
+							"key": "uploadId",
+							"value": "{{UploadId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Abort Multipart Upload",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1209c995-6bc3-4bb1-8e72-601a386573ee",
+						"exec": [
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "f443fcd8-36e9-4dc5-b2ef-81fb39a82226",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<CompleteMultipartUpload>\r\n<Part>\r\n<PartNumber>partNum1</PartNumber>\r\n<ETag>etag1</ETag>\r\n</Part>\r\n<Part>\r\n<PartNumber>partNum2</PartNumber>\r\n<ETag>etag2</ETag>\r\n</Part>\r\n<Part>\r\n<PartNumber>partNum3</PartNumber>\r\n<ETag>etag3</ETag>\r\n</Part>\r\n</CompleteMultipartUpload>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}?uploadId={{UploadId}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					],
+					"query": [
+						{
+							"key": "uploadId",
+							"value": "{{UploadId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Options Object",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "OPTIONS",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					},
+					{
+						"key": "Origin",
+						"value": "www.example.com"
+					},
+					{
+						"key": "Access-Control-Request-Method",
+						"value": "GET"
+					},
+					{
+						"key": "Access-Control-Request-Headers",
+						"value": "AllowedHeader_2"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post Object Restore",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1209c995-6bc3-4bb1-8e72-601a386573ee",
+						"exec": [
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "23fc5507-d55f-433d-a68a-dfa2c5de0e92",
+						"exec": [
+							"// MD5 digest of the content",
+							"var md5digest_RESTORE = CryptoJS.MD5(request.data);",
+							"var base64md5_RESTORE = CryptoJS.enc.Base64.stringify(md5digest_RESTORE);",
+							"",
+							"console.log(\"md5digest_RESTORE: \", pm.variables.get(\"md5digest_RESTORE\"));",
+							"console.log(\"base64md5_RESTORE: \", pm.variables.get(\"base64md5_RESTORE\"));",
+							"",
+							"// Set headers for the signature hash",
+							"var sigHeaders = {",
+							"    'content-md5' : base64md5_RESTORE",
+							"};",
+							"",
+							"// Set Postman environment variables for the headers",
+							"pm.globals.set('content-md5_RESTORE', base64md5_RESTORE);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/xml"
+					},
+					{
+						"key": "Content-MD5",
+						"value": "{{content-md5_RESTORE}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<RestoreRequest xmlns=\"http://s3.amazonaws.com/doc/2006-3-01\"> \r\n<Days>3</Days>\r\n<GlacierJobParameters>\r\n<Tier>Expedited</Tier>\r\n</GlacierJobParameters>\r\n</RestoreRequest>"
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}/{{obs_object_name}}?restore=",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}",
+						"{{obs_object_name}}"
+					],
+					"query": [
+						{
+							"key": "restore",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Bucket",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "region",
+							"value": "{{region}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "{{sk}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{ak}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://oss.{{base_url}}/{{bucket_name}}",
+					"protocol": "https",
+					"host": [
+						"oss",
+						"{{base_url}}"
+					],
+					"path": [
+						"{{bucket_name}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "4f00c608-116c-4b5c-867f-a75cc0962c25",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "c5b62aeb-8932-434d-82ad-862c11d6303b",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});"
+				]
+			}
+		}
+	]
+}

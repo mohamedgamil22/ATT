@@ -1,0 +1,1845 @@
+{
+	"info": {
+		"_postman_id": "ba994abb-5c77-4b10-8c83-317ccd342613",
+		"name": "RTS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ece783a1-7007-4bfa-97fa-6443e6ac69a8",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Response is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"if (pm.response.code !== 201) {",
+							"    postman.setNextRequest(null);",
+							"} else {",
+							"    pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.2.1 List Versions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "830182b1-a911-4a63-a5ea-1e3cfef53c5d",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3.1 List Stacks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "65812155-0b84-44a7-8d5b-8ec7bf81ca7b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3.2 Create Stack",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d9c579b6-6a61-4b4b-821c-effedfc79919",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Response is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"if (pm.response.code !== 201) {",
+							"    postman.setNextRequest(null);",
+							"} else {",
+							"    console.log(\"Extracting id of stack ...\");",
+							"    var jsonData = JSON.parse(responseBody);",
+							"    pm.globals.set(\"stack_id\", jsonData.stack.id);",
+							"}",
+							"",
+							"tests[\"[INFO] Request: \" + JSON.stringify(request)] = true;",
+							"tests[\"[INFO] Response: \" + responseBody] = true;"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"stack_name\": \"{{stack_name}}\",\r\n  \"template\": {\r\n    \"heat_template_version\": \"2013-05-23\",\r\n    \"description\": \"Test API simple stack with user data\",\r\n    \"parameters\": {\r\n      \"flavor\": {\r\n        \"default\": \"{{flavor}}\",\r\n        \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": {\r\n      \"{{resource_name}}\": {\r\n        \"type\": \"OS::Nova::Server\",\r\n        \"properties\": {\r\n          \"key_name\": \"{{key_name}}\",\r\n          \"flavor\": {\r\n            \"get_param\": \"flavor\"\r\n          },\r\n          \"image\": \"{{ubuntu_16_id}}\",\r\n          \"networks\": [{\r\n          \t\"network\": \"{{network_id_1}}\"\r\n          }],\r\n          \"availability_zone\":\"eu-west-0b\",\r\n          \"user_data\": \"#!/bin/bash -xv\\necho \\\"hello world\\\" &gt; /root/hello-world.txt\\n\"          \r\n        }\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check stack status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9a4fb3c3-09cb-42dd-abef-f95480010fc4",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"console.log(\"jsonData.stack.stack_status = \" + jsonData.stack.stack_status);",
+							"",
+							"if (jsonData.stack.stack_status === \"CREATE_COMPLETE\") {",
+							"    console.log(\"Stack ready !!!\");",
+							"} else {",
+							"    console.log(\"Stack not ready...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 5000);",
+							"    postman.setNextRequest(\"Check stack status\");",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3.3 Preview Stack",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9ffe7b9a-1e8b-4b20-8959-8576d1e796b1",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"stack_name\": \"{{stack_name}}_preview\",\r\n  \"template\": {\r\n    \"heat_template_version\": \"2013-05-23\",\r\n    \"description\": \"Test API simple stack with user data\",\r\n    \"parameters\": {\r\n      \"flavor\": {\r\n        \"default\": \"{{flavor}}\",\r\n        \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": {\r\n      \"server_01\": {\r\n        \"type\": \"OS::Nova::Server\",\r\n        \"properties\": {\r\n          \"key_name\": \"{{key_name}}\",\r\n          \"flavor\": {\r\n            \"get_param\": \"flavor\"\r\n          },\r\n          \"image\": \"{{ubuntu_16_id}}\",\r\n          \"networks\": [{\r\n          \t\"network\": \"{{network_id_1}}\"\r\n          }],\r\n          \"availability_zone\":\"eu-west-0b\",\r\n          \"user_data\": \"#!/bin/bash -xv\\necho \\\"hello world\\\" &gt; /root/hello-world.txt\\n\"          \r\n        }\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/preview",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"preview"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3.4 Find Stack",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a5b81da6-eba3-4953-8e89-e80c2465338c",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"stack_id\", jsonData.stack.id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3.5 Find Stack Resources",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c3862bfc-8004-4c28-895d-2db75241ba23",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/resources",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"resources"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3.6 Show Stack Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "58e5a1b8-ff03-48bc-b804-44fd8ab61b86",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3.7 Update Stack",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2468931d-5c0e-4110-8fd4-e8a62c442328",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 10000);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"template\": {\r\n    \"heat_template_version\": \"2013-05-23\",\r\n    \"description\": \"Updated stack\",\r\n    \"parameters\": {\r\n      \"flavor\": {\r\n        \"default\": \"{{flavor}}\",\r\n        \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": {\r\n      \"server_01\": {\r\n        \"type\": \"OS::Nova::Server\",\r\n        \"properties\": {\r\n          \"key_name\": \"{{key_name}}\",\r\n          \"flavor\": {\r\n            \"get_param\": \"flavor\"\r\n          },\r\n          \"image\": \"{{ubuntu_16_id}}\",\r\n          \"networks\": [{\r\n          \t\"network\": \"{{network_id_1}}\"\r\n          }],\r\n          \"availability_zone\":\"eu-west-0b\",\r\n          \"user_data\": \"#!/bin/bash -xv\\necho \\\"hello world\\\" &gt; /root/hello-world.txt\\n\"          \r\n        }\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.4.1 List Resources",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "01141a81-a469-495e-8ea3-7083d4cf9085",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/resources",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"resources"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.4.2 Show Resource Data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fe939997-4e3e-48eb-a2de-9ea7cad061e8",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/resources/{{resource_name}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"resources",
+						"{{resource_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.4.3 Show Resource Metadata",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a5e36bb9-392d-47b1-a3c6-6c1031ffbe29",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/resources/{{resource_name}}/metadata",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"resources",
+						"{{resource_name}}",
+						"metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.4.4 Send a Signal to a Resource",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a4decc2d-9027-4c23-966d-4d9ba2dc4513",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/resources/{{resource_name}}/signal",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"resources",
+						"{{resource_name}}",
+						"signal"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.4.5  Mark a Resource as Unhealthy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f51ee012-8717-4ba3-9829-a8721cd943e5",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"mark_unhealthy\": true,\r\n\t\"resource_status_reason\": \"API test\"\r\n}"
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/resources/{{resource_name}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"resources",
+						"{{resource_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3.7 Update Stack (flavor)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "685c9991-8632-4929-b9bf-fa0db35882d4",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 5000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"template\": {\r\n    \"heat_template_version\": \"2013-05-23\",\r\n    \"description\": \"Updated stack\",\r\n    \"parameters\": {\r\n      \"flavor\": {\r\n        \"default\": \"t2.small\",\r\n        \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": {\r\n      \"server_01\": {\r\n        \"type\": \"OS::Nova::Server\",\r\n        \"properties\": {\r\n          \"key_name\": \"{{key_name}}\",\r\n          \"flavor\": {\r\n            \"get_param\": \"flavor\"\r\n          },\r\n          \"image\": \"{{ubuntu_16_id}}\",\r\n          \"networks\": [{\r\n          \t\"network\": \"{{network_id_1}}\"\r\n          }],\r\n          \"availability_zone\":\"eu-west-0b\",\r\n          \"user_data\": \"#!/bin/bash -xv\\necho \\\"hello world\\\" &gt; /root/hello-world.txt\\n\"          \r\n        }\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.5.1 Cancel Stack Update",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "597b9527-28c1-4b5b-b6b8-c089a98f4ba5",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 5000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"cancel_update\": null\r\n}"
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/actions",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"actions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.5.2 Check Stack Resources",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a4decc2d-9027-4c23-966d-4d9ba2dc4513",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"check\": null\r\n}"
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/actions",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"actions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.6.1 List Stack Events",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a4decc2d-9027-4c23-966d-4d9ba2dc4513",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/events",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.6.2 Find Stack Events",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a4decc2d-9027-4c23-966d-4d9ba2dc4513",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/events",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.6.3 List Resource Events",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d52a31ff-8a75-4cd1-9688-c5f0d998a859",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"event_id\", jsonData.events[0].id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/resources/{{resource_name}}/events",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"resources",
+						"{{resource_name}}",
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.6.4 Show Event Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a4decc2d-9027-4c23-966d-4d9ba2dc4513",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/resources/{{resource_name}}/events/{{event_id}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"resources",
+						"{{resource_name}}",
+						"events",
+						"{{event_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.7.1 Get Stack Template",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}/template",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}",
+						"template"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.7.2 Validate Template",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"stack_name\": \"{{stack_name}}\",\r\n  \"template\": {\r\n    \"heat_template_version\": \"2013-05-23\",\r\n    \"description\": \"Test API simple stack with user data\",\r\n    \"parameters\": {\r\n      \"flavor\": {\r\n        \"default\": \"{{flavor}}\",\r\n        \"type\": \"string\"\r\n      }\r\n    },\r\n    \"resources\": {\r\n      \"{{resource_name}}\": {\r\n        \"type\": \"OS::Nova::Server\",\r\n        \"properties\": {\r\n          \"key_name\": \"{{key_name}}\",\r\n          \"flavor\": {\r\n            \"get_param\": \"flavor\"\r\n          },\r\n          \"image\": \"{{ubuntu_16_id}}\",\r\n          \"networks\": [{\r\n          \t\"network\": \"{{network_id_1}}\"\r\n          }],\r\n          \"availability_zone\":\"eu-west-0b\",\r\n          \"user_data\": \"#!/bin/bash -xv\\necho \\\"hello world\\\" &gt; /root/hello-world.txt\\n\"          \r\n        }\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/validate",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"validate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.7.3 Show Resource Template",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/resource_types/OS::Nova::Server/template",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"resource_types",
+						"OS::Nova::Server",
+						"template"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.7.4 Show Resource Schema",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/resource_types/OS::Nova::Server",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"resource_types",
+						"OS::Nova::Server"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.7.5 List Resource Types",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/resource_types",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"resource_types"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.8.1 Show Build Info",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/build_info",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"build_info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.9.1 Create Configuration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"inputs\": [\r\n{\r\n\"default\": null,\r\n\"type\": \"String\",\r\n\"name\": \"foo\",\r\n\"description\": null\r\n},\r\n{\r\n\"default\": null,\r\n\"type\": \"String\",\r\n\"name\": \"bar\",\r\n\"description\": null\r\n}\r\n],\r\n\"group\": \"script\",\r\n\"name\": \"a-config-we5zpvyu7b5o\",\r\n\"outputs\": [\r\n{\r\n\"type\": \"String\",\r\n\"name\": \"result\",\r\n\"error_output\": false,\r\n\"description\": null\r\n}\r\n],\r\n\"config\": \"#!/bin/sh -x\\necho \\\"Writing to /tmp/$bar\\\"\\necho $foo > /tmp/$bar\r\n\\necho -n \\\"The file /tmp/$bar contains `cat /tmp/$bar` for server\r\n$deploy_server_id during $deploy_action\\\" > $heat_outputs_path.result\\necho\r\n\\\"Written to /tmp/$bar\\\"\\necho \\\"Output to stderr\\\" 1>&2\",\r\n\"options\": null\r\n}"
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/software_configs",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"software_configs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.9.2 List Configs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/software_configs",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"software_configs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.9.3 Show Configuration Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/software_configs/{{config_id}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"software_configs",
+						"{{config_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.9.4 Delete Config",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/software_configs/{{config_id}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"software_configs",
+						"{{config_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.9.10 Show Server Configuration Metadata",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60d3266c-ce60-494d-88a2-599ec553ad10",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/software_deployments/metadata/{{server_id}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"software_deployments",
+						"metadata",
+						"{{server_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.3.8 Delete Stack",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b8965412-b6ac-44c0-8cc1-b1ac7eaf6c57",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rts.{{region}}.{{base_url}}/v1/{{tenant_id}}/stacks/{{stack_name}}/{{stack_id}}",
+					"protocol": "https",
+					"host": [
+						"rts",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"stacks",
+						"{{stack_name}}",
+						"{{stack_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "682cac41-0e95-40cb-a99d-c9fa256c4722",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "db456b78-dac5-4d3a-82dd-17019f5e3378",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,300]);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "915bc5d6-54b6-4c40-a905-c19ccb19c610",
+			"key": "stack_name",
+			"value": "test_api_stack_01",
+			"type": "string"
+		},
+		{
+			"id": "3e44d2c1-69fa-4a5d-bd5c-e762ed0e8e15",
+			"key": "resource_name",
+			"value": "server_01",
+			"type": "string"
+		},
+		{
+			"id": "04215582-ee3e-4231-8440-37c8dd00aa2d",
+			"key": "flavor",
+			"value": "s1.medium",
+			"type": "string"
+		}
+	]
+}

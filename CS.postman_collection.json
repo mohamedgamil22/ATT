@@ -1,0 +1,904 @@
+{
+	"info": {
+		"name": "CS",
+		"_postman_id": "37be8f5e-deb2-92e9-d205-059acfff3667",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET Project Scope Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a6f1b4ee-505f-4440-a476-ca847426950c",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an Exclusive Cluster",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "01c11c72-3034-4689-b741-625a0cfcf843",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"name\": \"Test_API\",\r\n\"desc\": \"Cluster description\",\r\n\"maximum_spu_quota\": 100\r\n}"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/reserved_cluster",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"reserved_cluster"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": " Querying Information About Exclusive Clusters",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/reserved_cluster/15",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"reserved_cluster",
+						"15"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Cluster List of a Tenant",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/reserved_clusters",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"reserved_clusters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating an Exclusive Cluster",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"name\": \"Test-CS-cluster\",\r\n  \"desc\": \"cluster desc\", \r\n  \"maximum_spu_quota\": 100\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/reserved_cluster/15",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"reserved_cluster",
+						"15"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the List of Jobs Running in an Exclusive Cluster",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/reserved_cluster/15/jobs",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"reserved_cluster",
+						"15",
+						"jobs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining User Quota Information About a Tenant",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d87b6c07-f97a-4441-b1e4-a1d166eb9d0f",
+						"type": "text/javascript",
+						"exec": [
+							"//var jsonData = JSON.parse(responseBody);",
+							"//pm.globals.set(\"user_id_cs\", jsonData.users.user_id)"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/user_quotas",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"user_quotas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Quota Information About a Specified User",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/user_quota/dc447a9415f5421190f336c837348430",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"user_quota",
+						"dc447a9415f5421190f336c837348430"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Quota Information About a Specified User",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"spu_quota\": 100, \r\n\"clusters\": [\r\n15\r\n] \r\n}"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/user_quota/c447a9415f5421190f336c837348430",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"user_quota",
+						"c447a9415f5421190f336c837348430"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Granting OBS Operation Rights to CS",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/obs_authorize",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"obs_authorize"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Collecting Summary Statistics",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/overview",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"overview"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a SQL Job",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n\"name\": \"job\", \r\n\"desc\": \"This is a job used for counting characters.\", \r\n  \"cluster_id\": 24, \r\n  \"run_mode\": \"shared_cluster\", \r\n  \"spu_number\": 2, \r\n  \"parallel_number\": 1, \r\n  \"checkpoint_enabled\": false, \r\n  \"checkpoint_mode\": \"exactly_once\", \r\n  \"checkpoint_interval\": 0, \r\n  \"obs_bucket\": \"cs\", \r\n  \"log_enabled\": false, \r\n  \"job_type\": \"flink_sql_job\"\r\n}"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/sql_job",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"sql_job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a SQL Job",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n\"job_id\": 85, \r\n  \"name\": \"job\", \r\n  \"cluster_id\": 15, \r\n  \"sql_body\": \"select * from source_table\", \r\n  \"run_mode\": \"shared_cluster\", \r\n  \"spu_number\": 4, \r\n  \"parallel_number\": 1, \r\n  \"checkpoint_mode\": \"exactly_once\", \r\n  \"checkpoint_interval\": 0, \r\n  \"obs_bucket\": \"string\", \r\n  \"log_enabled\": false \r\n}"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/sql_job",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"sql_job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a User-Defined Job",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/jar_job",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"jar_job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a User-Defined Job",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/jar_job",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"jar_job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Running a Job",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[0]"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/job/107/run",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"job",
+						"107",
+						"run"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stopping a Job",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[0]"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/job/72/stop",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"job",
+						"72",
+						"stop"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Job",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[0]"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/job/72",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"job",
+						"72"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Template",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"name\": \"test_template\", \r\n\"desc\": \"Example of quick start\", \r\n\"sql_body\": \"select * from source_table\" \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/job_template",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"job_template"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Template",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n  \"id\": \"9\", \r\n  \"name\": \"test_template\", \r\n  \"desc\": \"Example of quick start\",\r\n  \"sql_body\": \"select * from source_table\" \r\n}"
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/job_template",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"job_template"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Template",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/job_template/8",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"job_template",
+						"8"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Template List",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/job_templates",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"job_templates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Job List",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/jobs",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"jobs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Viewing Job Details",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/job/112",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"job",
+						"112"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Viewing Job Details copy",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/job/112/execute_graph",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"job",
+						"112",
+						"execute_graph"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Job Audit Logs",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cs.{{region}}.{{base_url}}/v1.0/{{project_id}}/audit_logs",
+					"protocol": "https",
+					"host": [
+						"cs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"audit_logs"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

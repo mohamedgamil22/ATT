@@ -1,0 +1,310 @@
+{
+	"info": {
+		"_postman_id": "46b95144-c615-4ceb-b2c5-b7cfe13b26b0",
+		"name": "AS Cleanup",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "60f5899c-581e-4829-b410-bd3ee27a44a2",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Response is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"if (pm.response.code !== 201) {",
+							"    console.log(\"Failed to get token, stopping collection\");",
+							"    postman.setNextRequest(null);",
+							"} else {",
+							"    pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying AS Groups",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "320bc14b-a729-4ce1-8c50-37b9c8a5e8e3",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"console.log(\"Number of scaling groups: \" + jsonData.scaling_groups.length);",
+							"",
+							"if ( 0 !== jsonData.scaling_groups.length) {",
+							"    console.log(\"Processing \" + jsonData.scaling_groups.length + \" scaling_groups\");",
+							"    jsonData.scaling_groups.forEach(function(scaling_group) {",
+							"        console.log(\"scaling_group_name: \" + scaling_group.scaling_group_name);",
+							"        pm.globals.set(\"scaling_group_id\", scaling_group.scaling_group_id);",
+							"        postman.setNextRequest(\"Querying Instances in an AS Group\");",
+							"    });",
+							"} else {",
+							"    console.log(\"No more scaling groups, stopping collection\");",
+							"    postman.setNextRequest(null);",
+							"}",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Instances in an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "22ecff8c-bbf1-4376-89e4-75f8e0444149",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"console.log(\"Number of instances in scaling group: \" + jsonData.scaling_group_instances.length);",
+							"",
+							"if ( 0 !== jsonData.scaling_group_instances.length) {",
+							"    console.log(\"Processing \" + jsonData.scaling_group_instances.length + \" instances\");",
+							"    jsonData.scaling_group_instances.forEach(function(instance) {",
+							"        console.log(\"instance_id: \" + instance.instance_id);",
+							"        pm.globals.set(\"instance_id\", instance.instance_id);",
+							"        postman.setNextRequest(\"Removing Instances from an AS Group\");",
+							"    });",
+							"} else {",
+							"    console.log(\"No more instance in this group\");",
+							"    postman.setNextRequest(\"Deleting an AS Group\");",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group_instance/{{scaling_group_id}}/list",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group_instance",
+						"{{scaling_group_id}}",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Removing Instances from an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3e6c9c89-2233-4a0d-9a0f-21ee845315f1",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before checking again",
+							"setTimeout(function(){}, 60000);",
+							"",
+							"postman.setNextRequest(\"Querying Instances in an AS Group\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group_instance/{{instance_id}}?instance_delete=yes",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group_instance",
+						"{{instance_id}}"
+					],
+					"query": [
+						{
+							"key": "instance_delete",
+							"value": "yes"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b25e8cf7-a272-4596-b4b5-9f2703f36289",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before checking again",
+							"setTimeout(function(){}, 5000);",
+							"",
+							"postman.setNextRequest(\"Querying AS Groups\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group/{{scaling_group_id}}?force_delete=no",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group",
+						"{{scaling_group_id}}"
+					],
+					"query": [
+						{
+							"key": "force_delete",
+							"value": "no"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

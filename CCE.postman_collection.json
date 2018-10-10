@@ -1,0 +1,962 @@
+{
+	"info": {
+		"name": "CCE API",
+		"_postman_id": "6c64c3a6-a153-2487-90fa-1be88a089713",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d551e3f2-8f93-4817-92bd-f1a5c38c340f",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Adding Monitoring Data\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Information About All Clusters",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/clusters",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"clusters"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Information About All Hosts in a Specified Cluster",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/clusters/{{cluster_id}}/hosts",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"clusters",
+						"{{cluster_id}}",
+						"hosts"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Information About a Specified Cluster",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/clusters/{{cluster_id}}",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"clusters",
+						"{{cluster_id}}"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Pod",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"apiVersion\": \"v1\",\r\n  \"kind\": \"Pod\",\r\n  \"metadata\": {\r\n    \"name\": \"lolilol\",\r\n    \"namespace\": \"default\",\r\n    \"labels\": {\r\n      \"name\": \"brace\"\r\n    }\r\n  },\r\n  \"spec\": {\r\n    \"containers\": [\r\n      {\r\n        \"image\": \"test:v1\",\r\n        \"env\": [\r\n          {\r\n            \"name\": \"cy\",\r\n            \"value\": \"cy\"\r\n          }\r\n        ],\r\n        \"imagePullPolicy\": \"IfNotPresent\",\r\n        \"name\": \"hello-world\",\r\n        \"volumeMounts\": [\r\n          {\r\n            \"mountPath\": \"/tmp/foo\",\r\n            \"name\": \"test\"\r\n          }\r\n        ]\r\n      }\r\n    ],\r\n    \"volumes\": [\r\n      {\r\n        \"name\": \"test\",\r\n        \"emptyDir\": {}\r\n      }\r\n    ],\r\n    \"restartPolicy\": \"Always\"\r\n  }\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/pods",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"pods"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Namespace",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"apiVersion\": \"v1\",\r\n  \"kind\": \"Namespace\",\r\n  \"metadata\": {\r\n    \"name\": \"development\",\r\n    \"labels\": {\r\n      \"name\": \"development\"\r\n    }\r\n  },\r\n  \"spec\": {\r\n    \"finalizers\": [\r\n      \"kubernetes\"\r\n    ]\r\n  },\r\n  \"status\": {\r\n    \"phase\": \"Active\"\r\n  }\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of Kind Service in a Specified Namespace",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/services",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"services"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of Kind Service",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/services",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"services"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reading a Specified Service",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/services/jiraservice",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"services",
+						"jiraservice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reading Logs of a Specified Pod",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/pods/lolilol",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"pods",
+						"lolilol"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of Kind Namespace",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of Kind Endpoint in a Specified Namespace",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/endpoints",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"endpoints"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a pod",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/pods/mypod",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"pods",
+						"mypod"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of Kind Pod in a Specified Namespace",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/pods",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"pods"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of Kind Pod",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/pods",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"pods"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of Kind Endpoint",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/endpoints",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"endpoints"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of Kind PodTemplate",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/podtemplates",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"podtemplates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Service",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"kind\": \"Service\",\r\n  \"apiVersion\": \"v1\",\r\n  \"metadata\": {\r\n    \"name\": \"myapp\"\r\n  },\r\n  \"spec\": {\r\n    \"ports\": [\r\n      {\r\n        \"port\": 8765,\r\n        \"targetPort\": 9376\r\n      }\r\n    ],\r\n    \"selector\": {\r\n      \"app\": \"example\"\r\n    }\r\n  }\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/services",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"services"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of ReplicationController",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/replicationcontrollers",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"replicationcontrollers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing or Watching Objects of ReplicationController in a Specified Namespace",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/replicationcontrollers",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"replicationcontrollers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reading a Specified ReplicationController",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/replicationcontrollers/jiracomp",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"replicationcontrollers",
+						"jiracomp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Service",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/default/services/myapp",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"default",
+						"services",
+						"myapp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Namespace",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Cluster-UUID",
+						"value": "{{cluster_id}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://cce.eu-west-0.cloud-ocb.orange-business.com/api/v1/namespaces/development",
+					"protocol": "https",
+					"host": [
+						"cce",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"namespaces",
+						"development"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

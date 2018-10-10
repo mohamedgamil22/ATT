@@ -1,0 +1,1223 @@
+{
+	"info": {
+		"name": "SMN",
+		"_postman_id": "32ce223e-9801-52bc-dd36-746100abd2a0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "dfac6e48-7187-4422-a02f-782ebd3a6cad",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Create topic\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create topic",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b204c69b-101e-4e2f-b8b4-e6abbfe872d8",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"topic_urn\", jsonData.topic_urn);",
+							"",
+							"console.log(\"topic_urn: \", pm.variables.get(\"topic_urn\"));",
+							"",
+							"postman.setNextRequest(\"Modify Topic\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"name\": \"Test-API-SMN_topic_{{$timestamp}}\",\r\n\"display_name\": \"tes\\nttest\"\r\n}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modify Topic",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3e128d3a-d5c6-4f8b-aa9c-9439914368a0",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Get Topics\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"display_name\":\"Test-API-SMN-new_display_name_{{$randomInt}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Topics",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "15e308f1-9911-417a-ac79-8bec8796366d",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Get Topics details\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics?offset=0&limit=100",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics"
+					],
+					"query": [
+						{
+							"key": "offset",
+							"value": "0",
+							"equals": true
+						},
+						{
+							"key": "limit",
+							"value": "100",
+							"equals": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Topics details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "855d418d-e6da-4c1d-ade5-03ac181a9f63",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Get Topics attributes\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Topics attributes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ead7e9ae-41c0-4f3f-b3cd-469553ea7368",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Modify Topic Attributes\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}/attributes?name=access_policy",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}",
+						"attributes"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "access_policy",
+							"equals": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modify Topic Attributes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "beeb8bdb-56d8-4b6f-903e-68bcbf829efa",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Delete Topic attribute\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"value\":\"{\\n  \\\"Version\\\": \\\"2016-09-07\\\",\\n  \\\"Id\\\": \\\"__default_policy_ID\\\",\\n  \\\"Statement\\\": [\\n    {\\n      \\\"Sid\\\": \\\"__user_pub_0\\\",\\n      \\\"Effect\\\": \\\"Allow\\\",\\n      \\\"Principal\\\": {\\n        \\\"CSP\\\": [\\n          \\\"urn:csp:iam::62df30d4bb58409094e463ee78f1627e:root\\\"\\n        ]\\n      },\\n      \\\"Action\\\": [\\n        \\\"SMN:Publish\\\",\\n        \\\"SMN:QueryTopicDetail\\\"\\n      ],\\n      \\\"Resource\\\": \\\"{{topic_urn}}\\\"\\n    }\\n  ]\\n}\"}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}/attributes/access_policy",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}",
+						"attributes",
+						"access_policy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Topic attribute",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bf9113fa-ea07-4260-91df-91ebd754232e",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Delete All Topic attributes\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}/attributes/access_policy",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}",
+						"attributes",
+						"access_policy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete All Topic attributes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "799946cc-caf2-4c1a-8182-c115991026a4",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Adding subscription\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}/attributes",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}",
+						"attributes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding subscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "948c867b-b9b4-47fe-97e9-a45f7bea4f1e",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"subscription_urn\", jsonData.subscription_urn);",
+							"",
+							"console.log(\"subscription_urn: \", pm.variables.get(\"subscription_urn\"));",
+							"",
+							"postman.setNextRequest(\"Get Subscriptions\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"protocol\": \"email\",\n\"endpoint\": \"{{$guid}}@orange.com\",\n\"remark\": \"O&M\"\n}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}/subscriptions",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}",
+						"subscriptions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Subscriptions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4f1fd52b-5ee9-446e-bbcf-9caeb7a769e6",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Get Subscriptions of Specified Topic\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/subscriptions?offset=0&limit=2",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"subscriptions"
+					],
+					"query": [
+						{
+							"key": "offset",
+							"value": "0",
+							"equals": true
+						},
+						{
+							"key": "limit",
+							"value": "2",
+							"equals": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Subscriptions of Specified Topic",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "55aa8945-ed05-4e8b-81a5-d59dd8d085b5",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Create message template\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}/subscriptions?offset=0&limit=10",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}",
+						"subscriptions"
+					],
+					"query": [
+						{
+							"key": "offset",
+							"value": "0",
+							"equals": true
+						},
+						{
+							"key": "limit",
+							"value": "10",
+							"equals": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create message template",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "775d259c-6930-46e6-afc9-51538ee2ac28",
+						"type": "text/javascript",
+						"exec": [
+							"var reqBody = JSON.parse(request.data);",
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"message_template_id\", jsonData.message_template_id);",
+							"console.log(\"message_template_id: \", pm.variables.get(\"message_template_id\"));",
+							"",
+							"pm.globals.set(\"message_template_name\", reqBody.message_template_name);",
+							"console.log(\"message_template_name: \", pm.variables.get(\"message_template_name\"));",
+							"",
+							"postman.setNextRequest(\"Get Message Templates\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "bd7f5d48-1503-44c0-9c5b-aa2dd1dd9553",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"message_template_name\": \"Test-API-SMN-template_name_{{$timestamp}}\",\r\n\"protocol\": \"https\",\r\n\"content\": \"(test)\"\r\n}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/message_template",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"message_template"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Message Templates",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "79267068-7be4-4379-8483-d44d9903f1ae",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Get Message Templates Details\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/message_template?offset=0&limit=3",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"message_template"
+					],
+					"query": [
+						{
+							"key": "offset",
+							"value": "0",
+							"equals": true
+						},
+						{
+							"key": "limit",
+							"value": "3",
+							"equals": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Message Templates Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "772b2a90-cdfe-4737-9bf7-f7a37ece85bb",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Modify a Message Template\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/message_template/{{message_template_id}}",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"message_template",
+						"{{message_template_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modify a Message Template",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0c91f3ed-c2b8-4965-b8ba-7084412ca332",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Publish Messages in common text\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"content\": \"(1/22)You are invited to subscribe to topic.Click the following URL to confirm subscription:(If you do not want to.subscribe to this topic, ignore this message.) {{$timestamp}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/message_template/{{message_template_id}}",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"message_template",
+						"{{message_template_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Publish Messages in common text",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "986714d5-fccb-4283-b3e9-e14097ff0d29",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Publish Messages Using a Message Structure\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"subject\": \"test message {{$randomInt}}\",\r\n\"message\": \"Message test message {{$randomInt}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}/publish",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}",
+						"publish"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Publish Messages Using a Message Structure",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "82cdd926-694f-4aaf-88a5-c9479d1f8c29",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Publish Messages Using a template\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"subject\":\"test message {{$randomInt}}\",\"message_structure\":\"{\\\"default\\\":\\\"test v2 default\\\", \\\"sms\\\":\\\"sms v2 message\\\"}\"}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}/publish",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}",
+						"publish"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Publish Messages Using a template",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "175bfb0e-1a89-4005-9ad1-fc7313a5ae67",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "9a350510-9388-414e-a97b-e5253adee27a",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Delete a Message Template\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"subject\": \"test message template {{$timestamp}}\",\r\n\"message_template_name\": \"{{smn_default_message_template_name}}\",\r\n\"tags\": {\r\n\"topic_urn\": \"{{topic_urn}}\",\r\n\"topic_id\": \"topic_id3332\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}/publish",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}",
+						"publish"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a Message Template",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "da214c84-af1d-4cf6-960f-b7bcec2bea7a",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Delete subscription\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/message_template/{{message_template_id}}",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"message_template",
+						"{{message_template_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete subscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "da1ab144-5465-4423-8d39-61a782be9e7a",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Delete Topic\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/subscriptions/{{subscription_urn}}",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"subscriptions",
+						"{{subscription_urn}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Topic",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0b9ec53a-d9f0-4913-b848-46f70a23b418",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(null);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn}}",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "973a268f-3d3f-45a8-89c3-5cba66ba02a0",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "495431f2-1c6a-44ff-be2b-e3fc3a41215e",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202]);",
+					"});",
+					""
+				]
+			}
+		}
+	]
+}

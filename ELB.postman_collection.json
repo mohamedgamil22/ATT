@@ -1,0 +1,2275 @@
+{
+	"info": {
+		"_postman_id": "52948559-b359-4d52-b904-53403bd52b47",
+		"name": "ELB",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f11a8f31-f2b6-4c3a-b4ad-9d481b172b97",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Applying for an Elastic IP Address for Load Balancer\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applying for an Elastic IP Address for Load Balancer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "069dc153-7a46-4620-bb9f-e68512983a21",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"publicip_elb_addr\", jsonData.publicip.public_ip_address);",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 2000);",
+							"",
+							"postman.setNextRequest(\"Creating a Load Balancer\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"publicip\": {\r\n    \"type\": \"5_bgp\"\r\n  },\r\n  \"bandwidth\": {\r\n    \"name\": \"test_api_elb1\",\r\n    \"size\": 1000,\r\n    \"share_type\": \"PER\"\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/publicips",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"publicips"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Load Balancer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30d1d745-6402-48f2-bd00-07a1fe2d3409",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_job_id\", jsonData.job_id);",
+							"",
+							"console.log(\"elb_job_id: \", pm.variables.get(\"elb_job_id\"));",
+							"",
+							"setTimeout(function(){}, 36000);",
+							"postman.setNextRequest(\"Get Load Balancer ID\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\":\"to_delete_Test_API_ELB_{{$timestamp}}\",\r\n   \"description\":\"test API simple lb\",\r\n   \"vpc_id\":\"{{vpc_id_1}}\",\r\n   \"vip_address\": \"{{publicip_elb_addr}}\",\r\n   \"bandwidth\":200,\r\n   \"type\":\"External\",\r\n   \"admin_state_up\":true\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/loadbalancers",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"loadbalancers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Load Balancer ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b5c87819-ebfe-4178-8411-802fdb06db9b",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"status\", jsonData.status);",
+							"",
+							"pm.test(\"ELB status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"if ( pm.variables.get(\"status\") == \"SUCCESS\") {",
+							"    console.log(\"status: SUCCESS \");",
+							"    ",
+							"    pm.globals.set(\"elb_id\", jsonData.entities.elb.id);",
+							"    console.log(\"elb_id: \", pm.variables.get(\"elb_id\"));",
+							"",
+							"    postman.setNextRequest(\"Modifying a Load Balancer\");",
+							"",
+							"} else {",
+							"    console.log(\"status: \", pm.variables.get(\"status\"));",
+							"    postman.setNextRequest(null);",
+							"} ",
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{elb_job_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{elb_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Load Balancer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1e801cb7-13bf-4bca-b89a-15c28dbb8173",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_mod_job_id\", jsonData.job_id);",
+							"",
+							"console.log(\"elb_mod_job_id: \", pm.variables.get(\"elb_mod_job_id\"));",
+							"",
+							"setTimeout(function(){}, 60000);",
+							"",
+							"postman.setNextRequest(\"Get Status Modify ELB\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"description\":\"change description of elb\",\r\n   \"name\":\"to_delete_rename_Test_API_ELB_{{$timestamp}}\",\r\n   \"bandwidth\":100,\r\n   \"admin_state_up\":true\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/loadbalancers/{{elb_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"loadbalancers",
+						"{{elb_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Status Modify ELB",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "85ec36d1-e3b3-408c-a499-669bc6a656e9",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_mod_status\", jsonData.status);",
+							"",
+							"pm.test(\"ELB modify status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"",
+							"if ( pm.variables.get(\"elb_mod_status\") == \"SUCCESS\") {",
+							"    console.log(\"elb_mod_status: SUCCESS \");",
+							"    postman.setNextRequest(\"Querying Load Balancers\");",
+							"} else {",
+							"    console.log(\"elb_mod_status: \", pm.variables.get(\"elb_mod_status\"));",
+							"    postman.setNextRequest(null);",
+							"    return;",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{elb_mod_job_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{elb_mod_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Load Balancers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "24e2ab46-d698-4681-84ac-039c74a1684f",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Load Balancer Details\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/loadbalancers",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"loadbalancers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Load Balancer Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e30de133-83ad-453e-9e44-34bfe422a7e8",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating a Listener\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/loadbalancers/{{elb_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"loadbalancers",
+						"{{elb_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Listener",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bb81e8c6-7e98-4d4f-bbba-33b431914272",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"listener_id\", jsonData.id);",
+							"",
+							"console.log(\"listener_id: \", pm.variables.get(\"listener_id\"));",
+							"",
+							"postman.setNextRequest(\"Modifying a Listener\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\":\"to_delete_listener1\",\r\n   \"description\":\"test API listener\",\r\n   \"loadbalancer_id\":\"{{elb_id}}\",\r\n   \"protocol\":\"HTTP\",\r\n   \"port\":88,\r\n   \"backend_protocol\":\"HTTP\",\r\n   \"backend_port\":80,\r\n   \"lb_algorithm\":\"roundrobin\",\r\n   \"session_sticky\":true,\r\n   \"sticky_session_type\":\"insert\",\r\n   \"cookie_timeout\":100,\r\n   \"tcp_draining\":true,\r\n   \"tcp_draining_timeout\":5\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/listeners",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"listeners"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Listener",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c8f9cd4a-f9d0-4a8b-9d4d-009251c3926d",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Listener Details\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\":\"to_delete_rename_listener1\",\r\n   \"description\":\"modify listener\",\r\n   \"port\":9090,\r\n   \"backend_port\":9090,\r\n   \"lb_algorithm\":\"roundrobin\"\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/listeners/{{listener_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"listeners",
+						"{{listener_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Listener Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9f800107-89b1-4ab1-afc3-e6d017adde92",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Listeners\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/listeners/{{listener_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"listeners",
+						"{{listener_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Listeners",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bb673ae5-6292-4231-a933-806048b0d38d",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating a Health Check Task\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/listeners?loadbalancer_id={{elb_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"listeners"
+					],
+					"query": [
+						{
+							"key": "loadbalancer_id",
+							"value": "{{elb_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Health Check Task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "65bc8e7a-ff92-475b-8ba1-e1b9f0b03f82",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"healthcheck_id\", jsonData.id);",
+							"",
+							"console.log(\"healthcheck_id: \", pm.variables.get(\"healthcheck_id\"));",
+							"",
+							"postman.setNextRequest(\"Modifying a Health Check Task\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"healthcheck_connect_port\":80,\r\n   \"healthcheck_interval\":5,\r\n   \"healthcheck_protocol\":\"HTTP\",\r\n   \"healthcheck_timeout\":10,\r\n   \"healthcheck_uri\":\"/\",\r\n   \"healthy_threshold\":3,\r\n   \"listener_id\":\"{{listener_id}}\",\r\n   \"unhealthy_threshold\":3\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/healthcheck",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"healthcheck"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Health Check Task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1196b3d8-c305-46e8-b20c-6a0e9605cff9",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Details of the Health Check Task\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"healthcheck_connect_port\":88,\r\n   \"healthcheck_interval\":5,\r\n   \"healthcheck_protocol\":\"HTTP\",\r\n   \"healthcheck_timeout\":10,\r\n   \"healthcheck_uri\":\"/\",\r\n   \"healthy_threshold\":3,\r\n   \"unhealthy_threshold\":2\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/healthcheck/{{healthcheck_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"healthcheck",
+						"{{healthcheck_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details of the Health Check Task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d5c0f540-a2e5-411a-b43e-33597978edef",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Adding a Backend ECS\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/healthcheck/{{healthcheck_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"healthcheck",
+						"{{healthcheck_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding a Backend ECS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "270d02c8-16cd-450a-81d2-8f57f2dae29d",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_backend_ecs_job_id\", jsonData.job_id);",
+							"",
+							"console.log(\"elb_backend_ecs_job_id: \", pm.variables.get(\"elb_backend_ecs_job_id\"));",
+							"",
+							"",
+							"setTimeout(function(){}, 18000);",
+							"",
+							"postman.setNextRequest(\"Get Status Adding a Backend ECS\");",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n   {\r\n      \"server_id\":\"{{ecs_id_1}}\",\r\n      \"address\":\"{{ecs_private_ip_1}}\"\r\n   }\r\n]"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/listeners/{{listener_id}}/members",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"listeners",
+						"{{listener_id}}",
+						"members"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Status Adding a Backend ECS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "28775507-89d0-421c-828e-6fad8141800c",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_backend_ecs_job_status\", jsonData.status);",
+							"",
+							"pm.test(\"Add backend status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"postman.setNextRequest(\"Querying Backend ECSs\");",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{elb_backend_ecs_job_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{elb_backend_ecs_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Backend ECSs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "34649007-d55f-483a-9995-ecae3c87b970",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_member_id\", jsonData[0].id);",
+							"",
+							"console.log(\"elb_member_id: \", pm.variables.get(\"elb_member_id\"));",
+							"",
+							"postman.setNextRequest(\"Querying Quotas\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/listeners/{{listener_id}}/members?limit=1&marker=0",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"listeners",
+						"{{listener_id}}",
+						"members"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "1"
+						},
+						{
+							"key": "marker",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Quotas",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6845de00-7dd3-46b4-84ef-b8d362a7607f",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating a Certificate\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/quotas",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"quotas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Certificate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ed6a8c9f-bca7-4d22-9f4a-bf75212f3177",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_certificate_id\", jsonData.id);",
+							"",
+							"console.log(\"elb_certificate_id: \", pm.variables.get(\"elb_certificate_id\"));",
+							"",
+							"postman.setNextRequest(\"Modifying a Certificate\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"to_delete_cert-api\",\r\n    \"description\": \"test API certificate\",\r\n    \"certificate\": \"-----BEGIN CERTIFICATE-----\\nMIIDXTCCAkWgAwIBAgIJANoPUy2NktS6MA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV\\nBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX\\naWRnaXRzIFB0eSBMdGQwHhcNMTYwNjIyMDMyOTU5WhcNMTkwNjIyMDMyOTU5WjBF\\nMQswCQYDVQQGEwJBVTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50\\nZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB\\nCgKCAQEArmUUhzm5sxxVr/ku4+6cKqnKgZvDl+e/6CNCAq8YMZXTpJP64DjDPny9\\n+8s9MbFabEG3HqjHSKh3b/Ew3FXr8LFa9YuWuAi3W9ii29sZsOwmzIfQhIOIaP1Y\\nNR50DDjbAGTaxzRhV40ZKSOCkaUTvl3do5d8ttD1VlF2r0w0DfclrVcsS5v3kw88\\n9gJ3s3hNkatfQiSt4qLNMehZ8Xofx58DIAOk/f3Vusj3372PsJwKX39cHX/NpIHC\\nHKE8qaGCpDqv0daH766eJ065dqO9DuorXPaPT/nxw4PAccb9fByLrTams0ThvSlZ\\no6V3yvHR4KN7mmvbViEmWRy+9oiJEwIDAQABo1AwTjAdBgNVHQ4EFgQUlXhcABza\\n2SdXPYpp8RkWvKblCNIwHwYDVR0jBBgwFoAUlXhcABza2SdXPYpp8RkWvKblCNIw\\nDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOCAQEAHmsFDOwbkD45PF4oYdX+\\ncCoEGNjsLfi0spJ6b1CHQMEy2tPqYZJh8nGuUtB9Zd7+rbwm6NS38eGQVA5vbWZH\\nMk+uq5un7YFwkM+fdjgCxbe/3PMkk/ZDYPHhpc1W8e/+aZVUBB2EpfzBC6tcP/DV\\nSsjq+tG+JZIVADMxvEqVIF94JMpuY7o6U74SnUUrAi0h9GkWmeYh/Ucb3PLMe5sF\\noZriRdAKc96KB0eUphfWZNtptOCqV6qtYqZZ/UCotp99xzrDkf8jGkm/iBljxb+v\\n0NTg8JwfmykCj63YhTKpHf0+N/EK5yX1KUYtlkLaf8OPlsp/1lqAL6CdnydGEd/s\\nAA==\\n-----END CERTIFICATE-----\",\r\n    \"private_key\": \"-----BEGIN RSA PRIVATE KEY-----\\nMIIEpAIBAAKCAQEArmUUhzm5sxxVr/ku4+6cKqnKgZvDl+e/6CNCAq8YMZXTpJP6\\n4DjDPny9+8s9MbFabEG3HqjHSKh3b/Ew3FXr8LFa9YuWuAi3W9ii29sZsOwmzIfQ\\nhIOIaP1YNR50DDjbAGTaxzRhV40ZKSOCkaUTvl3do5d8ttD1VlF2r0w0DfclrVcs\\nS5v3kw889gJ3s3hNkatfQiSt4qLNMehZ8Xofx58DIAOk/f3Vusj3372PsJwKX39c\\nHX/NpIHCHKE8qaGCpDqv0daH766eJ065dqO9DuorXPaPT/nxw4PAccb9fByLrTam\\ns0ThvSlZo6V3yvHR4KN7mmvbViEmWRy+9oiJEwIDAQABAoIBACV47rpHuxEza24O\\nevbbFI9OQIcs8xA26dN1j/+HpAkzinB4o5V+XOWWZDQwbYu58hYE4NYjqf6AxHk3\\nOCqAA9yKH2NXhSEyLkP7/rKDF7geZg/YtwNiR/NXTJbNXl4p8VTaVvAq3yey188x\\nJCMrd1yWSsOWD2Qw7iaIBpqQIzdEovPE4CG6GmaIRSuqYuoCfbVTFa6YST7jmOTv\\nEpG+x6yJZzJ4o0vvfKbKfvPmQizjL+3nAW9g+kgXJmA1xTujiky7bzm2sLK2Slrx\\n5rY73mXMElseSlhkYzWwyRmC6M+rWALXqOhVDgIGbaBV4IOzuyH/CUt0wy3ZMIpv\\nMOWMNoECgYEA1LHsepCmwjlDF3yf/OztCr/DYqM4HjAY6FTmH+xz1Zjd5R1XOq60\\nYFRkhs/e2D6M/gSX6hMqS9sCkg25yRJk3CsPeoS9v5MoiZQA8XlQNovcpWUI2DCm\\naZRIsdovFgIqMHYh/Y4CYouee7Nz7foICzO9svrYrbOIVmMwDVJ8vzMCgYEA0ebg\\nm0lCuOunyxaSBqOv4Q4sk7Ix0702dIrW0tsUJyU+xuXYH1P/0m+t4/KUU2cNwsg3\\njiNzQR9QKvF8yTB5TB4Ye/9dKlu+BEOskvCpuErxc6iVJ+TZOrQDDPNcq56qez5b\\nvv9EDdgzpjkjO+hS1j3kYOuG11hrP4Pox4PijqECgYEAz6RTZORKqFoWsZss5VK3\\np0LGkEkfw/jYmBgqAQhpnSD7n20hd1yPI2vAKAxPVXTbWDFLzWygYiWRQNy9fxrB\\n9F7lYYqtY5VagdVHhnYUZOvtoFoeZFA6ZeAph9elGCtM3Lq3PD2i/mmncsQibTUn\\nHSiKDWzuk8UtWIjEpHze5BkCgYEAifD9eG+bzqTnn1qU2pIl2nQTLXj0r97v84Tu\\niqF4zAT5DYMtFeGBBI1qLJxVh7342CH2CI4ZhxmJ+L68sAcQH8rDcnGui1DBPlIv\\nDl3kW3280bJfW1lUvPRh8NfZ9dsO1HF1n75nveVwg/OWyR7zmWIRPPRrqAeua45H\\nox5z/CECgYBqwlEBjue8oOkVVu/lKi6fo6jr+0u25K9dp9azHYwE0KNHX0MwRALw\\nWbPgcjge23sfhbeqVvHo0JYBdRsk/OBuW73/9Sb5E+6auDoubCjC0cAIvs23MPju\\nsMvKak4mQkI19foRXBydB/DDkK26iei/l0xoygrw50v2HErsQ7JcHw==\\n-----END RSA PRIVATE KEY-----\"\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/certificate",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"certificate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Certificate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4229ab23-f588-4636-a8a9-f465fb620c9b",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Certificates\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\":\"to_delete_rename_cert-api\",\r\n   \"description\":\"rename certificate\"\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/certificate/{{elb_certificate_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"certificate",
+						"{{elb_certificate_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Certificates",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ca31a312-bed7-4e77-99f4-c798c1664467",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Monitoring Metrics\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/certificate",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"certificate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Monitoring Metrics",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "054a93d1-09d9-4b5f-976f-881f865c6513",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a Certificate\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/monitor",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"monitor"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Certificate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "65d92191-17a5-4590-8e60-a5f03c8e9063",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Removing a Backend ECS\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/certificate/{{elb_certificate_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"certificate",
+						"{{elb_certificate_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Removing a Backend ECS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4afcae48-d007-4764-ae9e-40f7f7ed2c6f",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a Health Check Task\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"removeMember\":[\r\n      {\r\n         \"id\":\"{{elb_member_id}}\"\r\n      }\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/listeners/{{listener_id}}/members/action",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"listeners",
+						"{{listener_id}}",
+						"members",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Health Check Task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bd5eaa8c-ac1b-48e6-b672-d053003443eb",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a Listener\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/healthcheck/{{healthcheck_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"healthcheck",
+						"{{healthcheck_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Listener",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9c101d36-3a66-4693-a715-80e8fead136f",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a Load Balancer\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/listeners/{{listener_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"listeners",
+						"{{listener_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Load Balancer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1b012f56-8645-401a-8741-e60040a336f5",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_del_id\", jsonData.job_id);",
+							"",
+							"console.log(\"elb_del_id: \", pm.variables.get(\"elb_del_id\"));",
+							"",
+							"setTimeout(function(){}, 60000);",
+							"postman.setNextRequest(\"Quering Status delete Load Balancer\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/loadbalancers/{{elb_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"loadbalancers",
+						"{{elb_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Quering Status delete Load Balancer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5b50ac6a-ca51-4395-9059-9ca5189f1086",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_del_status\", jsonData.status);",
+							"",
+							"pm.test(\"Delete ELB status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"",
+							"if ( pm.variables.get(\"elb_del_status\") == \"SUCCESS\") {",
+							"    console.log(\"elb_del_status: SUCCESS \");",
+							"    postman.setNextRequest(\"Applying for an Elastic IP Address for Public Network Load Balancer\");",
+							"} else {",
+							"    console.log(\"elb_del_status: \", pm.variables.get(\"elb_del_status\"));",
+							"    console.log(pm.variables.get(jsonData));",
+							"    postman.setNextRequest(null);",
+							"    return;",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{elb_del_id}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{elb_del_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applying for an Elastic IP Address for Public Network Load Balancer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d7bcf15c-ae00-480e-969f-9fa917d79cf8",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"publicip_elb_addr2\", jsonData.publicip.public_ip_address);",
+							"pm.globals.set(\"publicip_elb_id2\", jsonData.publicip.id);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 2000);",
+							"",
+							"postman.setNextRequest(\"Creating a Public Network Load Balancer\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"publicip\": {\r\n    \"type\": \"5_bgp\"\r\n  },\r\n  \"bandwidth\": {\r\n    \"name\": \"test_api_networkelb1\",\r\n    \"size\": 1000,\r\n    \"share_type\": \"PER\"\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/publicips",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"publicips"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Public Network Load Balancer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e70d57b4-338f-4e5a-9f3a-826be34bae19",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_job_id2\", jsonData.job_id);",
+							"",
+							"console.log(\"elb_job_id2: \", pm.variables.get(\"elb_job_id2\"));",
+							"",
+							"setTimeout(function(){}, 30000);",
+							"postman.setNextRequest(\"Get Public Network Load Balancer ID\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\":\"to_delete_Test_API_ELB_{{$timestamp}}\",\r\n   \"description\":\"test API simple lb\",\r\n   \"vpc_id\":\"{{vpc_id_1}}\",\r\n   \"vip_address\": \"{{publicip_elb_addr2}}\",\r\n   \"bandwidth\":200,\r\n   \"type\":\"External\",\r\n   \"admin_state_up\":true\r\n}"
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/loadbalancers",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"loadbalancers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Public Network Load Balancer ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0eebec89-cd05-48bc-bc38-082391e1a260",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"status\", jsonData.status);",
+							"",
+							"pm.test(\"Public Network LB status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"if ( pm.variables.get(\"status\") == \"SUCCESS\") {",
+							"    console.log(\"status: SUCCESS \");",
+							"    ",
+							"    pm.globals.set(\"elb_id2\", jsonData.entities.elb.id);",
+							"    console.log(\"elb_id2: \", pm.variables.get(\"elb_id2\"));",
+							"",
+							"    postman.setNextRequest(\"Deleting a Public Network Load Balancer\");",
+							"",
+							"} else {",
+							"    console.log(\"status: \", pm.variables.get(\"status\"));",
+							"    postman.setNextRequest(null);",
+							"} ",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{elb_job_id2}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{elb_job_id2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Public Network Load Balancer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fbfbf5d9-fb4f-4bab-9f42-05a1c66c7ca7",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_del_id2\", jsonData.job_id);",
+							"",
+							"console.log(\"elb_del_id2: \", pm.variables.get(\"elb_del_id2\"));",
+							"",
+							"setTimeout(function(){}, 30000);",
+							"postman.setNextRequest(\"Quering Status delete Public Network Load Balancer\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1.0/{{project_id}}/elbaas/loadbalancers/{{elb_id2}}/keep-eip",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"elbaas",
+						"loadbalancers",
+						"{{elb_id2}}",
+						"keep-eip"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Quering Status delete Public Network Load Balancer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5715a39a-34cd-4c2a-8aa0-e3da841779d6",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"elb_del_status2\", jsonData.status);",
+							"",
+							"pm.test(\"Delete Public Network LB status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"if ( pm.variables.get(\"elb_del_status2\") == \"SUCCESS\") {",
+							"    console.log(\"elb_del_status2: SUCCESS \");",
+							"    postman.setNextRequest(\"Deleting an Elastic IP of Public Network Load Balancer\");",
+							"} else {",
+							"    console.log(\"elb_del_status2: \", pm.variables.get(\"elb_del_status2\"));",
+							"    console.log(pm.variables.get(jsonData));",
+							"    postman.setNextRequest(null);",
+							"    return;",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "39f6db77-59bd-4987-aa74-c4e5a7834e37",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://elb.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{elb_del_id2}}",
+					"protocol": "https",
+					"host": [
+						"elb",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{elb_del_id2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an Elastic IP of Public Network Load Balancer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "deb815c3-1fca-4437-9fde-2a66c53cfbf5",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(null);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/publicips/{{publicip_elb_id2}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"publicips",
+						"{{publicip_elb_id2}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "5bedc732-fab5-42b7-912a-b71596d46487",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "b42942e4-b2e4-4dc1-9148-ea0649a46af7",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"setTimeout(function(){}, 1000);"
+				]
+			}
+		}
+	]
+}

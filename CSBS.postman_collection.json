@@ -1,0 +1,1147 @@
+{
+	"info": {
+		"_postman_id": "0ca93777-395e-4122-a1b7-d76908a4ce4c",
+		"name": "CSBS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ef8ea414-4cde-45b1-b254-a117306870af",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Response is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"if (pm.response.code !== 201) {",
+							"    postman.setNextRequest(null);",
+							"} else {",
+							"    pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "10f15aa3-ea85-43c8-a6e1-486261a94143",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"ecs_id\", jsonData.server.id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"server\": {\n\t\t\"name\": \"toDelete-testAPI-CSBS-{{$randomInt}}\",\n\t\t\"flavorRef\": \"s1.medium\",\n\t\t\"imageRef\": \"{{ubuntu_16_id}}\",\n\t\t\"networks\": [{\n\t\t\t\"uuid\": \"{{subnet_id_1}}\"\n\t\t}],\n\t\t\"availability_zone\": \"eu-west-0b\",\n\t\t\"key_name\": \"{{key_name}}\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check ECS status",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "83863170-a51b-4406-9713-2f082ef30162",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"console.log(\"jsonData.server.status = \" + jsonData.server.status);",
+							"",
+							"if (jsonData.server.status === \"ACTIVE\") {",
+							"    console.log(\"ECS ready !!!\");",
+							"    //pm.globals.set(\"ecs_id\", jsonData.server.id);",
+							"    //pm.globals.set(\"volume_id\", jsonData.server.os-extended-volumes:volumes_attached.id);",
+							"} else if (jsonData.server.status === \"BUILD\") {",
+							"    console.log(\"ECS not ready...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 5000);",
+							"    postman.setNextRequest(\"Check ECS status\");",
+							"} else {",
+							"    console.log(\"Job failed!\");",
+							"    postman.setNextRequest(null);",
+							"    tests[\"Creating an ECS\"] = responseCode.code === 9999999;",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get ECS volume id",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "575372e5-e941-4f89-af74-e25ac9e32f24",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"volume_id\", jsonData.volumeAttachments[0].id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_id}}/os-volume_attachments",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_id}}",
+						"os-volume_attachments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Backup Policy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e4b80e8e-1771-4349-90ea-aee774a7b73b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e6a5836d-13a3-49e7-918d-2179b35a01d6",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"csbs_policy_id\", jsonData.policy.id);",
+							"console.log(\"csbs_policy_id: \", pm.variables.get(\"csbs_policy_id\"));",
+							"",
+							"pm.globals.set(\"csbs_scheduled_operations_id\", jsonData.policy.scheduled_operations[0].id);",
+							"console.log(\"csbs_scheduled_operations_id: \", pm.variables.get(\"csbs_scheduled_operations_id\"));",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 3000);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"policy\":{\r\n      \"name\":\"todelete-test-api-csbs-backpolicy-{{$randomInt}}\",\r\n      \"description\":\"to delete test api csbs\",\r\n      \"provider_id\":\"{{csbs_provider_id}}\",\r\n      \"parameters\":{\r\n         \"common\":{\r\n\r\n         }\r\n      },\r\n      \"scheduled_operations\":[\r\n         {\r\n            \"name\":\"my-backup-policy\",\r\n            \"description\":\"My backup policy\",\r\n            \"enabled\":true,\r\n            \"operation_definition\":{\r\n               \"max_backups\":20\r\n            },\r\n            \"trigger\":{\r\n               \"properties\":{\r\n                  \"pattern\":\"BEGIN:VCALENDAR\\r\\nBEGIN:VEVENT\\r\\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\\r\\nEND:VEVENT\\r\\nEND:VCALENDAR\\r\\n\"\r\n               }\r\n            },\r\n            \"operation_type\":\"backup\"\r\n         }\r\n      ],\r\n      \"resources\":[\r\n         {\r\n            \"id\":\"{{ecs_id}}\",\r\n            \"type\":\"OS::Nova::Server\",\r\n            \"name\":\"Test-API-ECS-01\"\r\n         }\r\n      ]\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/policies",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"policies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Backup Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ebc8275a-1251-4dd2-b6ac-ff7e400958c7",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"policy\":{\r\n      \"name\":\"todelete-update-test-api-csbs-backpolicy-{{$randomInt}}\",\r\n      \"scheduled_operations\":[\r\n         {\r\n            \"id\":\"{{csbs_scheduled_operations_id}}\",\r\n            \"name\":\"my-backup-policy\",\r\n            \"description\":\"My backup policy \",\r\n            \"enabled\":true,\r\n            \"operation_definition\":{\r\n               \"retention_duration_days\":-1,\r\n               \"max_backups\":10\r\n            },\r\n            \"trigger\":{\r\n               \"properties\":{\r\n                  \"pattern\":\"BEGIN:VCALENDAR\\r\\nBEGIN:VEVENT\\r\\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\\r\\nEND:VEVENT\\r\\nEND:VCALENDAR\\r\\n\"\r\n               }\r\n            }\r\n         }\r\n      ]\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/policies/{{csbs_policy_id}}",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"policies",
+						"{{csbs_policy_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Backup Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d09eec66-8b39-4eab-b059-aa2647659966",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/policies/{{csbs_policy_id}}",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"policies",
+						"{{csbs_policy_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Backup Policy List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "babbbf93-41c4-4c08-b537-2b57d8f5636b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/policies",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"policies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Backup Capabilities of Resources",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f5ee4628-eb4f-477e-9596-5a5b66e70d44",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"check_protectable\":[\r\n      {\r\n         \"resource_id\":\"{{ecs_id}}\",\r\n         \"resource_type\":\"OS::Nova::Server\"\r\n      }\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/providers/{{csbs_provider_id}}/resources/action",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"providers",
+						"{{csbs_provider_id}}",
+						"resources",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Resource Backup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "36a0cb8d-c671-4430-bea9-6417a5e8b6e4",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"csbs_resource_backup_id\", jsonData.checkpoint.id);",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 300000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"protect\":{\r\n      \"backup_name\":\"to-delete-test-api-backup-{{$randomInt}}\",\r\n      \"description\":\"to delete backup test\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/providers/{{csbs_provider_id}}/resources/{{ecs_id}}/action",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"providers",
+						"{{csbs_provider_id}}",
+						"resources",
+						"{{ecs_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Executing a Backup Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "376479cf-ae16-491e-b1c6-71324b5a1337",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"csbs_auto_backup_id\", jsonData.checkpoint.id);",
+							"",
+							"console.log(\"csbs_auto_backup_id: \", pm.variables.get(\"csbs_auto_backup_id\"));",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 300000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"checkpoint\":{\r\n      \"plan_id\":\"{{csbs_policy_id}}\",\r\n      \"parameters\":{\r\n         \"auto_trigger\":false,\r\n         \"resources\":[\r\n            \"{{ecs_id}}\"\r\n         ]\r\n      }\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/providers/{{csbs_provider_id}}/checkpoints",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"providers",
+						"{{csbs_provider_id}}",
+						"checkpoints"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Queries the Number of Backups",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e725f9a3-9853-4db8-84dd-ccadfb1acae7",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/checkpoint_items/count",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"checkpoint_items",
+						"count"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying All Backups",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "696031b4-0a26-497a-a8d8-d0ff3dffe6f9",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"csbs_checkpoint_items_id\", jsonData.checkpoint_items[0].id);",
+							"",
+							"console.log(\"csbs_checkpoint_items_id: \", pm.variables.get(\"csbs_checkpoint_items_id\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"policy\":{\r\n      \"name\":\"my-plan\",\r\n      \"scheduled_operations\":[\r\n         {\r\n            \"id\":\"fed3c8f1-7b6e-4e24-b1ad-473838bad569\",\r\n            \"name\":\"my-backup-policy\",\r\n            \"description\":\"My backup policy \",\r\n            \"enabled\":true,\r\n            \"operation_definition\":{\r\n               \"retention_duration_days\":-1,\r\n               \"max_backups\":20\r\n            },\r\n            \"trigger\":{\r\n               \"properties\":{\r\n                  \"pattern\":\"BEGIN:VCALENDAR\\r\\nBEGIN:VEVENT\\r\\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\\r\\nEND:VEVENT\\r\\nEND:VCALENDAR\\r\\n\"\r\n               }\r\n            }\r\n         }\r\n      ]\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/checkpoint_items",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"checkpoint_items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Single Backup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1e32e6c6-69cd-47e2-85fd-6b93b98ae51d",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"csbs_backup_id\", jsonData.checkpoint_item.id);",
+							"",
+							"console.log(\"csbs_backup_id: \", pm.variables.get(\"csbs_backup_id\"));",
+							"",
+							"",
+							"pm.globals.set(\"csbs_checkpoint_id\", jsonData.checkpoint_item.checkpoint_id);",
+							"",
+							"console.log(\"csbs_checkpoint_id: \", pm.variables.get(\"csbs_checkpoint_id\"));",
+							"",
+							"",
+							"pm.globals.set(\"csbs_backup_volume_id_1\", jsonData.checkpoint_item.extend_info.volume_backups[0].id);",
+							"",
+							"console.log(\"csbs_backup_volume_id_1: \", pm.variables.get(\"csbs_backup_volume_id_1\"));",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"policy\":{\r\n      \"name\":\"my-plan\",\r\n      \"scheduled_operations\":[\r\n         {\r\n            \"id\":\"fed3c8f1-7b6e-4e24-b1ad-473838bad569\",\r\n            \"name\":\"my-backup-policy\",\r\n            \"description\":\"My backup policy \",\r\n            \"enabled\":true,\r\n            \"operation_definition\":{\r\n               \"retention_duration_days\":-1,\r\n               \"max_backups\":20\r\n            },\r\n            \"trigger\":{\r\n               \"properties\":{\r\n                  \"pattern\":\"BEGIN:VCALENDAR\\r\\nBEGIN:VEVENT\\r\\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\\r\\nEND:VEVENT\\r\\nEND:VCALENDAR\\r\\n\"\r\n               }\r\n            }\r\n         }\r\n      ]\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/checkpoint_items/{{csbs_checkpoint_items_id}}",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"checkpoint_items",
+						"{{csbs_checkpoint_items_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Quotas",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b629027e-a00f-4ab5-96ef-e16cc9bb6e70",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"policy\":{\r\n      \"name\":\"my-plan\",\r\n      \"scheduled_operations\":[\r\n         {\r\n            \"id\":\"fed3c8f1-7b6e-4e24-b1ad-473838bad569\",\r\n            \"name\":\"my-backup-policy\",\r\n            \"description\":\"My backup policy \",\r\n            \"enabled\":true,\r\n            \"operation_definition\":{\r\n               \"retention_duration_days\":-1,\r\n               \"max_backups\":20\r\n            },\r\n            \"trigger\":{\r\n               \"properties\":{\r\n                  \"pattern\":\"BEGIN:VCALENDAR\\r\\nBEGIN:VEVENT\\r\\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\\r\\nEND:VEVENT\\r\\nEND:VCALENDAR\\r\\n\"\r\n               }\r\n            }\r\n         }\r\n      ]\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/quotas",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"quotas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Restoration Capabilities of Resources",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "84467481-1fd6-4b6d-acc3-9dd2144878b7",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 20000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"check_restorable\":[\r\n      {\r\n         \"checkpoint_item_id\":\"{{csbs_backup_id}}\",\r\n         \"target\":{\r\n            \"resource_type\":\"OS::Nova::Server\",\r\n            \"resource_id\":\"{{ecs_id}}\",\r\n            \"volumes\":[\r\n               {\r\n                  \"backup_id\":\"{{csbs_backup_volume_id_1}}\",\r\n                  \"volume_id\":\"{{volume_id}}\"\r\n               }\r\n            ]\r\n         }\r\n      }\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/providers/{{csbs_provider_id}}/resources/action",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"providers",
+						"{{csbs_provider_id}}",
+						"resources",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Restoration Task",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "80367e30-7aed-4927-8dfe-00a18580b84b",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 360000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restore\":{\r\n      \"provider_id\":\"{{csbs_provider_id}}\",\r\n      \"checkpoint_id\":\"{{csbs_checkpoint_id}}\",\r\n      \"parameters\":{\r\n         \"checkpoint_item_id\":\"{{csbs_backup_id}}\",\r\n         \"power_on\":false,\r\n         \"targets\":{\r\n            \"server_id\":\"{{ecs_id}}\",\r\n            \"volumes\":[\r\n               {\r\n                  \"backup_id\":\"{{csbs_backup_volume_id_1}}\",\r\n                  \"volume_id\":\"{{volume_id}}\"\r\n               }\r\n            ]\r\n         }\r\n      }\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/restores",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"restores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Backup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0f37c1fe-818d-44f3-8e70-09051af2046b",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/providers/{{csbs_provider_id}}/checkpoints/{{csbs_resource_backup_id}}",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"providers",
+						"{{csbs_provider_id}}",
+						"checkpoints",
+						"{{csbs_resource_backup_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an Auto Backup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "aa5ef420-ca4d-40d6-9665-f7a0dd5ae7ff",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 180000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/providers/{{csbs_provider_id}}/checkpoints/{{csbs_auto_backup_id}}",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"providers",
+						"{{csbs_provider_id}}",
+						"checkpoints",
+						"{{csbs_auto_backup_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Backup Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5ddb9d42-3816-49ee-92dc-ff6737b48ade",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 5000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://csbs.{{region}}.{{base_url}}/v1/{{project_id}}/policies/{{csbs_policy_id}}",
+					"protocol": "https",
+					"host": [
+						"csbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"policies",
+						"{{csbs_policy_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an ECS (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3b0a895f-210c-4a2b-8de8-d1549da8aa6c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "bf016ac3-bc40-455e-944c-7ef27d8fc18e",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{ecs_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{ecs_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "f1ee16f2-52f5-4d43-8846-aaf4b33152f5",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "05f7608a-7d16-41f8-8a72-6fbec09004ac",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"if (pm.response.code != 200 && pm.response.code != 201 && pm.response.code != 202 && pm.response.code != 204) {",
+					"    console.log(\"url: \" + request.url);",
+					"    console.log(\"body: \" + request.data);",
+					"    console.log(\"responseBody: \" + responseBody)",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "7148ffb9-3085-42dc-a3b8-d05998f2b308",
+			"key": "csbs_provider_id",
+			"value": "fc4d5750-22e7-4798-8a46-f48f62c4c1da",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,638 @@
+{
+	"info": {
+		"_postman_id": "1e258022-251b-4cdf-80b4-caf63d742d0e",
+		"name": "SDRS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "098a0d44-4203-483c-bf2d-80a37f4f8839",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Response is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"if (pm.response.code !== 201) {",
+							"    postman.setNextRequest(null);",
+							"} else {",
+							"    pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create server (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d7cac978-b0d0-4829-b219-67641c5c9655",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"server_id\", jsonData.server.id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"server\": {\n\t\t\"name\": \"toDelete-SDRS-ECS-{{$randomInt}}\",\n\t\t\"flavorRef\": \"s1.medium\",\n\t\t\"imageRef\": \"{{ubuntu_16_id}}\",\n\t\t\"networks\": [{\n\t\t\t\"uuid\": \"{{subnet_id_1}}\"\n\t\t}],\n\t\t\"availability_zone\": \"eu-west-0b\",\n\t\t\"key_name\": \"{{key_name}}\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check ECS status",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f57dd421-bd7d-4ae0-b76b-087508917c63",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"console.log(\"jsonData.server.status = \" + jsonData.server.status);",
+							"",
+							"if (jsonData.server.status === \"ACTIVE\") {",
+							"    console.log(\"ECS ready !!!\");",
+							"} else if (jsonData.server.status === \"BUILD\") {",
+							"    console.log(\"ECS not ready...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 5000);",
+							"    postman.setNextRequest(\"Check ECS status\");",
+							"} else {",
+							"    console.log(\"Job failed!\");",
+							"    postman.setNextRequest(null);",
+							"    tests[\"VM creation failed\"] = responseCode.code === 9999999;",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"server\": {\n\"name\": \"Test-API-ECS-01-toDelete\",\n\"flavorRef\": \"t2.micro\",\n\"imageRef\": \"{{ubuntu_16_id}}\",\n\"networks\": [{\n\"uuid\": \"{{subnet_id_1}}\"\n}],\n\"availability_zone\": \"eu-west-0b\",\n\"key_name\": \"{{key_name}}\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{server_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{server_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying an Active-Active Domain",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "98a82bd3-de02-4f43-948b-db33f5d5f29c",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"sdrs_domain_id\", jsonData.domains[0].id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://sdrs.{{region}}.{{base_url}}/v1/{{project_id}}/active-domains",
+					"protocol": "https",
+					"host": [
+						"sdrs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"active-domains"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Protection Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dbd934d7-603f-4542-a8dc-3b3499d82670",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"job_id\", jsonData.job_id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"server_group\": {\r\n\t\t\"name\": \"{{server_group_name}}\",\r\n\t\t\"description\": \"Test API\",\r\n\t\t\"source_availability_zone\": \"eu-west-0a\",\r\n\t\t\"target_availability_zone\": \"eu-west-0b\",\r\n\t\t\"domain_id\": \"{{sdrs_domain_id}}\",\r\n\t\t\"source_vpc_id\":\"{{vpc_id_1}}\",\r\n\t\t\"dr_type\":\"migration\"\r\n\t}\r\n}"
+				},
+				"url": {
+					"raw": "https://sdrs.{{region}}.{{base_url}}/v1/{{project_id}}/server-groups",
+					"protocol": "https",
+					"host": [
+						"sdrs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"server-groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check job status - Creating a Protection Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "551faea1-b689-4c39-b01e-2321e7f2fd84",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"if (pm.response.code != 200 && pm.response.code != 201 && pm.response.code != 202 && pm.response.code != 204) {",
+							"    // In case API not found for example, stop collection",
+							"    postman.setNextRequest(null);",
+							"} else {",
+							"    if (jsonData.status === \"SUCCESS\") {",
+							"        console.log(\"Job succeeded.\");",
+							"    } else if (jsonData.status === \"FAILS\") {",
+							"        console.log(\"Job failed!\");",
+							"        postman.setNextRequest(null);",
+							"    } else {",
+							"        console.log(\"Job running...\");",
+							"        // Wait few seconds before checking again",
+							"        setTimeout(function(){}, 2000);",
+							"        postman.setNextRequest(\"Check job status - Creating a Protection Group\");",
+							"    }",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://sdrs.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{job_id}}",
+					"protocol": "https",
+					"host": [
+						"sdrs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Protection Groups",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dbb20646-6f2b-47ef-b4bb-5e28cccb8228",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"var server_group_name = pm.variables.get(\"server_group_name\");",
+							"",
+							"jsonData.server_groups.forEach(function(server_group) {",
+							"    if (server_group_name === server_group.name) {",
+							"        console.log(server_group_name  + \" has been found\");",
+							"        pm.globals.set(\"server_group_id\", server_group.id);",
+							"    } else {",
+							"        console.log(server_group.name + \" did not match \" + server_group_name);",
+							"    }",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://sdrs.{{region}}.{{base_url}}/v1/{{project_id}}/server-groups",
+					"protocol": "https",
+					"host": [
+						"sdrs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"server-groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Details of a Protection Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9d7c4505-bb2a-4071-ace1-24434902a868",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://sdrs.{{region}}.{{base_url}}/v1/{{project_id}}/server-groups/{{server_group_id}}",
+					"protocol": "https",
+					"host": [
+						"sdrs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"server-groups",
+						"{{server_group_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Protection Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "42e7d504-ab05-49cd-956f-ac5c0e0d1113",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"job_id\", jsonData.job_id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://sdrs.{{region}}.{{base_url}}/v1/{{project_id}}/server-groups/{{server_group_id}}",
+					"protocol": "https",
+					"host": [
+						"sdrs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"server-groups",
+						"{{server_group_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check job status - Deleting a Protection Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f6fff661-1bc7-4a15-a704-f34c7a221543",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"if (jsonData.status === \"SUCCESS\") {",
+							"    console.log(\"Job succeeded.\");",
+							"} else if (jsonData.status === \"FAILS\") {",
+							"    console.log(\"Job failed!\");",
+							"    postman.setNextRequest(null);",
+							"} else {",
+							"    console.log(\"Job running...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 2000);",
+							"    postman.setNextRequest(\"Check job status - Deleting a Protection Group\");",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://sdrs.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{job_id}}",
+					"protocol": "https",
+					"host": [
+						"sdrs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete server (Native)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3b0a895f-210c-4a2b-8de8-d1549da8aa6c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/servers/{{server_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"servers",
+						"{{server_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "031f02ac-ff7e-44fc-8700-4774660211b5",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "1351c6cc-6012-409e-9c0a-0b73dff3733e",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Check return code is 200,201,202 or 204\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"if (pm.response.code != 200 && pm.response.code != 201 && pm.response.code != 202 && pm.response.code != 204) {",
+					"    console.log(\"body: \" + request.data);",
+					"    console.log(\"responseBody: \" + responseBody);",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "817a354b-fa3b-4046-8285-4ef93c0bbde5",
+			"key": "server_group_name",
+			"value": "toDelete-SDRS-protection-group",
+			"type": "string"
+		}
+	]
+}

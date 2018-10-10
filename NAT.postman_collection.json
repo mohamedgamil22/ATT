@@ -1,0 +1,680 @@
+{
+	"info": {
+		"_postman_id": "0f0099d0-eb47-465f-9d09-ced4a04d512d",
+		"name": "NAT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "44f85a3d-d282-4d5f-9003-39da2b4db7b1",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Querying Versions\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Versions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "27bf7487-d222-4418-80b7-6eb25acde273",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating a NAT Gateway\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a NAT Gateway",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0ea5faa6-9d29-4b0b-a75d-4b6221888a2a",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"nat_gw_id\", jsonData.nat_gateway.id);",
+							"",
+							"console.log(\"nat_gw_id: \", pm.variables.get(\"nat_gw_id\"));",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 20000);",
+							"",
+							"postman.setNextRequest(\"Updating a NAT Gateway\");",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "04f62efa-8471-4bba-a642-49356cf4b17b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"nat_gateway\":{\r\n      \"name\":\"todelete_test_api_nat_{{$randomInt}}\",\r\n      \"description\":\"test api nat gateway\",\r\n      \"router_id\":\"{{vpc_id_1}}\",\r\n      \"internal_network_id\":\"{{subnet_id_1}}\",\r\n      \"spec\":\"1\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/v2.0/nat_gateways",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"nat_gateways"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a NAT Gateway",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ebdf48e4-438e-4f9d-b259-dfb6f8c42b00",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 20000);",
+							"",
+							"postman.setNextRequest(\"Querying a NAT Gateway List\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"nat_gateway\":{\r\n      \"name\":\"todelete_test_api_new_name_NAT_\",\r\n      \"description\":\"new description\",\r\n      \"spec\":\"1\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/v2.0/nat_gateways/{{nat_gw_id}}",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"nat_gateways",
+						"{{nat_gw_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a NAT Gateway List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6566e974-1f5e-45ae-bc5e-4618d9ee5ec5",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Details About a Specified NAT Gateway\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/v2.0/nat_gateways",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"nat_gateways"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About a Specified NAT Gateway",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ab82fd9b-d120-43c4-a4e1-9cb4151ab3b4",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Applying for an Elastic IP Address\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/v2.0/nat_gateways/{{nat_gw_id}}",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"nat_gateways",
+						"{{nat_gw_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applying for an Elastic IP Address",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "4f24c5e9-2b69-497a-93e0-e3f7f1c3d733",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"publicip_nat_gw_id\", jsonData.publicip.id);",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 15000);",
+							"",
+							"postman.setNextRequest(\"Creating an SNAT Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"publicip\": {\r\n    \"type\": \"5_bgp\"\r\n  },\r\n  \"bandwidth\": {\r\n    \"name\": \"test_api_nat1\",\r\n    \"size\": 1000,\r\n    \"share_type\": \"PER\"\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{tenant_id}}/publicips",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"publicips"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an SNAT Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1cd162a0-72db-480f-959b-d7fd20586c42",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"snat_rule_id\", jsonData.snat_rule.id);",
+							"",
+							"console.log(\"snat_rule_id: \", pm.variables.get(\"snat_rule_id\"));",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 20000);",
+							"",
+							"postman.setNextRequest(\"Querying an SNAT Rule List\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "04f62efa-8471-4bba-a642-49356cf4b17b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"snat_rule\":{\r\n      \"nat_gateway_id\":\"{{nat_gw_id}}\",\r\n      \"network_id\":\"{{subnet_id_1}}\",\r\n      \"floating_ip_id\":\"{{publicip_nat_gw_id}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/v2.0/snat_rules",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"snat_rules"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying an SNAT Rule List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "83780e53-0ab9-4bba-be5c-2beb8f271c82",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Details About a Specified SNAT Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/v2.0/snat_rules",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"snat_rules"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About a Specified SNAT Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "43705de8-69b9-4d37-b244-d7ae5423018b",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting an SNAT Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/v2.0/snat_rules/{{snat_rule_id}}",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"snat_rules",
+						"{{snat_rule_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an SNAT Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cb7d04a9-318d-4833-b378-727e65defac2",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 20000);",
+							"",
+							"postman.setNextRequest(\"Deleting an Elastic IP Address\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/v2.0/snat_rules/{{snat_rule_id}}",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"snat_rules",
+						"{{snat_rule_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an Elastic IP Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7a02d935-c6a6-4127-9bce-e7d46d2270f6",
+						"type": "text/javascript",
+						"exec": [
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 20000);",
+							"",
+							"postman.setNextRequest(\"Deleting a NAT Gateway\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v1/{{project_id}}/publicips/{{publicip_nat_gw_id}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"publicips",
+						"{{publicip_nat_gw_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a NAT Gateway",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2e32a8e3-37e7-49d6-bd8c-a8fb2589500e",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(null);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://nat.{{region}}.{{base_url}}/v2.0/nat_gateways/{{nat_gw_id}}",
+					"protocol": "https",
+					"host": [
+						"nat",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"nat_gateways",
+						"{{nat_gw_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "741b50e3-892c-4064-be81-b14bc6d77c64",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "0ef9b1a6-2f84-43c8-8002-3d22c93eb512",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,300]);",
+					"});"
+				]
+			}
+		}
+	]
+}

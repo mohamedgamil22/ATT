@@ -1,0 +1,2382 @@
+{
+	"info": {
+		"_postman_id": "553063d5-ec18-44e8-87fe-535606194875",
+		"name": "VPC-Native",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9fb7866c-7027-4c02-983f-62a3d05fa54c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0b490bef-3484-4dfe-ae82-c4b4f62cf705",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Network",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "99b985b5-ba81-43c3-93f8-9bcde897da1f",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"network_native_api_id_01\", jsonData.network.id);",
+							"pm.globals.set(\"network_native_api_name_01\", jsonData.network.name);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 10000);",
+							"",
+							"pm.test(\"Network creation status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.network.status).to.eql(\"ACTIVE\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"network\":{\r\n      \"shared\":false,\r\n      \"name\":\"todelete_api_network-{{$randomInt}}\",\r\n      \"admin_state_up\":true,\r\n      \"tenant_id\":\"{{tenant_id}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/networks",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"networks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Networks",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/networks",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"networks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Network Details",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/networks/{{network_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"networks",
+						"{{network_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Network",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "23a16700-1b59-43ff-afdd-cd5a9f04a4bc",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"network_native_api_name_01\", jsonData.network.name);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"network\":{\r\n      \"name\":\"todelete_api_new_network-{{$randomInt}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/networks/{{network_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"networks",
+						"{{network_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Subnet",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "54342490-7d45-412c-9a58-69d9094de786",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"subnet_native_api_id_01\", jsonData.subnet.id);",
+							"pm.globals.set(\"subnet_native_api_name_01\", jsonData.subnet.name);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 10000);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"subnet\":{\r\n      \"name\":\"todelete_subnet_native_api-{{$randomInt}}\",\r\n      \"enable_dhcp\":true,\r\n      \"network_id\":\"{{network_native_api_id_01}}\",\r\n      \"tenant_id\":\"{{tenant_id}}\",\r\n      \"dns_nameservers\":[\r\n         \"8.8.8.8\",\r\n         \"8.8.8.7\"\r\n      ],\r\n      \"allocation_pools\":[\r\n         {\r\n            \"start\":\"10.0.10.2\",\r\n            \"end\":\"10.0.10.254\"\r\n         }\r\n      ],\r\n      \"host_routes\":[\r\n      ],\r\n      \"ip_version\":4,\r\n      \"gateway_ip\":\"10.0.10.1\",\r\n      \"cidr\":\"10.0.10.0/24\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/subnets",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"subnets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Subnets",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/subnets",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"subnets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Subnet",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/subnets/{{subnet_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"subnets",
+						"{{subnet_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Subnet",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7557a5fa-fe48-46fc-813f-723a374c5c3e",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"subnet_native_api_name_01\", jsonData.subnet.name);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"subnet\":{\r\n      \"name\":\"todelete_new_subnet_native_api-{{$randomInt}}\",\r\n      \"dns_nameservers\":[\r\n         \"1.1.1.1\",\r\n         \"2.2.2.2\"\r\n      ],\r\n      \"enable_dhcp\":true\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/subnets/{{subnet_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"subnets",
+						"{{subnet_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Router",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "99ef3293-e1ab-49de-b3ef-5a369c1fcf75",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"router_native_api_id_01\", jsonData.router.id);",
+							"pm.globals.set(\"router_native_api_name_01\", jsonData.router.name);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 10000);",
+							"",
+							"pm.test(\"Router creation status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.router.status).to.eql(\"ACTIVE\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"router\":{\r\n      \"name\":\"todelete_api_router-{{$randomInt}}\",\r\n      \"admin_state_up\":true\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/routers",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"routers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Routers",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/routers",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"routers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Router",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/routers/{{router_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"routers",
+						"{{router_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Router",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "4dd0e27e-ae54-4106-ae93-bf2e80774601",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"router_native_api_name_01\", jsonData.router.name);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"router\":{\r\n      \"name\":\"todelete_api_new_router-{{$randomInt}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/routers/{{router_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"routers",
+						"{{router_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding an Interface to a Router",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ccc40943-17b7-4587-b276-481e9d304f69",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"//pm.globals.set(\"network_native_api_name_01\", jsonData.network.name);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"subnet_id\":\"{{subnet_native_api_id_01}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/routers/{{router_native_api_id_01}}/add_router_interface",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"routers",
+						"{{router_native_api_id_01}}",
+						"add_router_interface"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Port",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "8577cddb-239c-42de-9603-c1cddd266968",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"port_api_id_01\", jsonData.port.id);",
+							"pm.globals.set(\"port_api_name_01\", jsonData.port.name);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 10000);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"port\":{\r\n      \"admin_state_up\":true,\r\n      \"fixed_ips\":[\r\n         {\r\n            \"ip_address\":\"10.0.10.20\",\r\n            \"subnet_id\":\"{{subnet_native_api_id_01}}\"\r\n         }\r\n      ],\r\n      \"name\":\"todelete-test-api-port-{{$randomInt}}\",\r\n      \"network_id\":\"{{network_native_api_id_01}}\",\r\n      \"tenant_id\":\"{{tenant_id}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/ports",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"ports"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Ports",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/ports",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"ports"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Port",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/ports/{{port_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"ports",
+						"{{port_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Port",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "01824ce9-7653-460b-94d1-f97451c23d9b",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"port_api_name_01\", jsonData.port.name);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"port\":{\r\n      \"name\":\"todelete-newtest-api-port-{{$randomInt}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/ports/{{port_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"ports",
+						"{{port_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Security Group",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "283cf689-5dff-4ed7-a0ed-dde0834f68ff",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"sg_native_api_id_01\", jsonData.security_group.id);",
+							"console.log(\"sg_native_api_id_01: \", pm.variables.get(\"sg_native_api_id_01\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"security_group\":{\r\n      \"name\":\"todelete_sg_api-{{$randomInt}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-groups",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Security Groups",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-groups",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Security Group",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-groups/{{sg_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-groups",
+						"{{sg_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Security Group",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"security_group\":{\r\n      \"name\":\"todelete_new_sg_api-{{$randomInt}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-groups/{{sg_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-groups",
+						"{{sg_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Security Group Rule",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "022b1f46-2207-4a2c-874a-0fa27c13a810",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"sg_native_rule_id_01\", jsonData.security_group_rule.id);",
+							"console.log(\"sg_native_rule_id_01: \", pm.variables.get(\"sg_native_rule_id_01\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"security_group_rule\":{\r\n      \"security_group_id\":\"{{sg_native_api_id_01}}\",\r\n      \"direction\":\"egress\",\r\n      \"protocol\":\"tcp\",\r\n      \"remote_ip_prefix\":\"10.10.0.0/24\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-group-rules",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-group-rules"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Security Group Rules",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-group-rules",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-group-rules"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Security Group Rule",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-group-rules/{{sg_native_rule_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-group-rules",
+						"{{sg_native_rule_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Firewall Rule",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "bc59c333-72d2-40d6-a3cb-40614026b91b",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"fw_rule_id_01\", jsonData.firewall_rule.id);",
+							"console.log(\"fw_rule_id_01: \", pm.variables.get(\"fw_rule_id_01\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"firewall_rule\":{\r\n      \"action\":\"allow\",\r\n      \"enabled\":true,\r\n      \"destination_port\":\"80\",\r\n      \"protocol\":\"tcp\",\r\n      \"name\":\"ALLOW_HTTP\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_rules",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_rules"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Firewall Rules",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_rules",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_rules"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Firewall Rule",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_rules/{{fw_rule_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_rules",
+						"{{fw_rule_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Firewall Rule",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"firewall_rule\":{\r\n      \"action\":\"reject\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_rules/{{fw_rule_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_rules",
+						"{{fw_rule_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Firewall Policy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "05bd97b0-4b09-421e-ab0c-7cafa485722e",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"fw_policy_api_id_01\", jsonData.firewall_policy.id);",
+							"console.log(\"fw_policy_api_id_01: \", pm.variables.get(\"fw_policy_api_id_01\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"firewall_policy\":{\r\n      \"name\":\"todelete_fw_policy_api-{{$randomInt}}\",\r\n      \"firewall_rules\":[\r\n      ]\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_policies",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_policies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Firewall Policies",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_policies",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_policies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Firewall Policy",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_policies/{{fw_policy_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_policies",
+						"{{fw_policy_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Inserting a Firewall Rule",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"insert_after\":\"\",\r\n   \"firewall_rule_id\":\"{{fw_rule_id_01}}\",\r\n   \"insert_before\":\"\"\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_policies/{{fw_policy_api_id_01}}/insert_rule",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_policies",
+						"{{fw_policy_api_id_01}}",
+						"insert_rule"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Firewall Policy",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"firewall_policy\":{\r\n      \"firewall_rules\":[\r\n         \"{{fw_rule_id_01}}\"\r\n      ]\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_policies/{{fw_policy_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_policies",
+						"{{fw_policy_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Firewall Group",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "6128ff08-5ca5-4438-8c52-8e6661b5f46a",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"fw_group_id_01\", jsonData.firewall_group.id);",
+							"console.log(\"fw_group_id_01: \", pm.variables.get(\"fw_group_id_01\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"firewall_group\":{\r\n      \"ingress_firewall_policy_id\":\"{{fw_policy_api_id_01}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_groups",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Firewall Groups",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_groups",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Firewall Group",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_groups/{{fw_group_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_groups",
+						"{{fw_group_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Firewall Group",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"firewall_group\":{\r\n      \"egress_firewall_policy_id\":\"{{fw_policy_api_id_01}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_groups/{{fw_group_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_groups",
+						"{{fw_group_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Floating IP Address",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "fd888151-797c-46ad-8b76-99c08b585c17",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"floating_network_id_01\", \"0a2228f2-7f8a-45f1-8e09-9039e1d09975\");"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7428f2a5-38a8-4b31-841e-709ec59b4c9a",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"fip_native_api_id_01\", jsonData.floatingip.id);",
+							"pm.globals.set(\"fip_native_api_status_01\", jsonData.floatingip.status);",
+							"pm.globals.set(\"fip_native_api_fipaddress_01\", jsonData.floatingip.floating_ip_address);",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 10000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"floatingip\":{\r\n      \"floating_network_id\":\"{{floating_network_id_01}}\",\r\n      \"port_id\":\"{{port_api_id_01}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/floatingips",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"floatingips"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Floating IP Addresses",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/floatingips",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"floatingips"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Floating IP Address",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/floatingips/{{fip_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"floatingips",
+						"{{fip_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Floating IP Address KO",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f2c4a37d-418c-4adb-ae89-bdd20dbc8900",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"//pm.globals.set(\"network_native_api_name_01\", jsonData.network.name);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"floatingip\":{\r\n      \"port_id\": null\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/floatingips/{{fip_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"floatingips",
+						"{{fip_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Floating IP Address",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7d51aa7b-4072-4ed3-8ae0-489c9af613f6",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/floatingips/{{fip_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"floatingips",
+						"{{fip_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Removing a Firewall Rule from a Firewall Policy",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"firewall_rule_id\":\"{{fw_rule_id_01}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_policies/{{fw_policy_api_id_01}}/remove_rule",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_policies",
+						"{{fw_policy_api_id_01}}",
+						"remove_rule"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Firewall Group",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_groups/{{fw_group_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_groups",
+						"{{fw_group_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Firewall Policy",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_policies/{{fw_policy_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_policies",
+						"{{fw_policy_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Firewall Rule",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/fwaas/firewall_rules/{{fw_rule_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"fwaas",
+						"firewall_rules",
+						"{{fw_rule_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Security Group Rule",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-group-rules/{{sg_native_rule_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-group-rules",
+						"{{sg_native_rule_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Security Group",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/security-groups/{{sg_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"security-groups",
+						"{{sg_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Port",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7d51aa7b-4072-4ed3-8ae0-489c9af613f6",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/ports/{{port_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"ports",
+						"{{port_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Removing an Interface from a Router",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ccc40943-17b7-4587-b276-481e9d304f69",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"//pm.globals.set(\"network_native_api_name_01\", jsonData.network.name);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"subnet_id\":\"{{subnet_native_api_id_01}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/routers/{{router_native_api_id_01}}/remove_router_interface",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"routers",
+						"{{router_native_api_id_01}}",
+						"remove_router_interface"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Router",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7d51aa7b-4072-4ed3-8ae0-489c9af613f6",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/routers/{{router_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"routers",
+						"{{router_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Subnet",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7d51aa7b-4072-4ed3-8ae0-489c9af613f6",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/subnets/{{subnet_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"subnets",
+						"{{subnet_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Network",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2910b466-e52c-4074-accd-eb03ab623448",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7d51aa7b-4072-4ed3-8ae0-489c9af613f6",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vpc.{{region}}.{{base_url}}/v2.0/networks/{{network_native_api_id_01}}",
+					"protocol": "https",
+					"host": [
+						"vpc",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2.0",
+						"networks",
+						"{{network_native_api_id_01}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "b91d21c2-c252-4034-b4be-c741ae7495d5",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "782adbc6-f963-4565-98f7-7f3001d0d716",
+				"type": "text/javascript",
+				"exec": [
+					"//tests[\"Response time is acceptable\"] = responseTime < 500; // milliseconds",
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"// Wait few seconds before executing next request",
+					"setTimeout(function(){}, 4000);"
+				]
+			}
+		}
+	]
+}

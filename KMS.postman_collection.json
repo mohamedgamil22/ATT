@@ -1,0 +1,700 @@
+{
+	"info": {
+		"_postman_id": "d1a8c0f4-c87e-4d92-b66f-fd5959f0744f",
+		"name": "KMS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e5feee19-42b5-44f9-bd8a-3541db7bd4de",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a CMK",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "34a5d8d0-947f-436d-8429-b5479f156327",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"key_id\", jsonData.key_info.key_id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"key_alias\": \"testAPI-{{$randomInt}}\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/create-key",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"create-key"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Disabling a CMK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"key_id\": \"{{key_id}}\"\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/disable-key",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"disable-key"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Enabling a CMK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n\"key_id\": \"{{key_id}}\" \r\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/enable-key",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"enable-key"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the List of CMKs",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/list-keys",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"list-keys"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Information About a CMK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"key_id\": \"{{key_id}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/describe-key",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"describe-key"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Random Number",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"random_data_length\": \"512\" \r\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/gen-random",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"gen-random"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a DEK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"key_id\": \"{{key_id}}\",\r\n    \"datakey_length\": \"512\"\r\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/create-datakey",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"create-datakey"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Plaintext-Free DEK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"key_id\": \"{{key_id}}\", \r\n    \"datakey_length\": \"512\" \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/create-datakey-without-plaintext",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"create-datakey-without-plaintext"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Encrypting a DEK",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cbe86576-32c0-45aa-8eb4-e0e40fb68fd3",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"cipher_text\", jsonData.cipher_text);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"key_id\": \"{{key_id}}\",\r\n    \"plain_text\": \"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000F5A5FD42D16A20302798EF6ED309979B43003D2320D9F0E8EA9831A92759FB4B\",\r\n    \"datakey_plain_length\": \"64\"\r\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/encrypt-datakey",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"encrypt-datakey"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Decrypting a DEK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"key_id\": \"{{key_id}}\",\r\n    \"datakey_cipher_length\": \"64\",\r\n    \"cipher_text\": \"{{cipher_text}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/decrypt-datakey",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"decrypt-datakey"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Number of Instances",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/user-instances",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"user-instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Quota of a User",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/user-quotas",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"user-quotas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Changing the Alias of a CMK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"key_alias\": \"TestAPIUpdatedAlias{{$randomInt}}\",\"key_id\": \"{{key_id}}\"}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/update-key-alias",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"update-key-alias"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Changing the Description of a CMK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"key_id\": \"{{key_id}}\",\r\n    \"key_description\": \"updatedDescription\"     \r\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/update-key-description",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"update-key-description"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Scheduling the Deletion of a CMK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"key_id\": \"{{key_id}}\",\r\n    \"pending_days\": \"7\"\r\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/schedule-key-deletion",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"schedule-key-deletion"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Canceling the Scheduled Deletion of a CMK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"key_id\": \"{{key_id}}\"}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/cancel-key-deletion",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"cancel-key-deletion"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Scheduling the Deletion of a CMK",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"key_id\": \"{{key_id}}\",\r\n    \"pending_days\": \"7\"\r\n}"
+				},
+				"url": {
+					"raw": "https://kms.{{region}}.{{base_url}}/v1.0/{{project_id}}/kms/schedule-key-deletion",
+					"protocol": "https",
+					"host": [
+						"kms",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"kms",
+						"schedule-key-deletion"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "90d7a7df-20bb-4e4e-904b-fa068243e7cc",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "cde0b23d-ec29-4a9f-b157-fc8584da2f4b",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});"
+				]
+			}
+		}
+	]
+}

@@ -1,0 +1,1203 @@
+{
+	"info": {
+		"_postman_id": "91a03d6a-d712-4ca5-b673-a21b3fc390f6",
+		"name": "Workspace",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "34e5e500-8ce5-4cae-9eef-edfac45e364a",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Applying for Workspace\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Applying for Workspace",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c1bf8d12-6a82-4872-9ea0-42a6a35b1a09",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"workspace_job_id\", jsonData.job_id);",
+							"",
+							"setTimeout(function(){}, 2100000);",
+							"",
+							"postman.setNextRequest(\"Get Workspace Status\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"ad_domains\":{\r\n      \"domain_type\":\"LITE_AD\",\r\n      \"domain_name\":\"testapi.litead.com\",\r\n      \"domain_admin_account\":\"vdsadmin\",\r\n      \"domain_password\":\"Testabc!23\"\r\n   },\r\n   \"vpc_id\":\"{{vpc_id_2}}\",\r\n   \"subnet_ids\":[\r\n      {\r\n         \"subnet_id\":\"{{subnet_id_2}}\"\r\n      }\r\n   ],\r\n   \"access_mode\":\"INTERNET\",\r\n   \"availability_zone\":\"eu-west-0a\"\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/workspaces",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"workspaces"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Workspace Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d278ab4e-14e0-402a-8e4a-d8ff6e83eb25",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"workspace_status\", jsonData.status);",
+							"",
+							"",
+							"pm.test(\"Workspace status check\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"postman.setNextRequest(\"Querying Workspace Details\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/workspace-jobs/{{workspace_job_id}}",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"workspace-jobs",
+						"{{workspace_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying Workspace Attributes KO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "30e948aa-8608-4174-b223-7cc53a825bee",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"ad_domains\":{\r\n      \"domain_type\":\"LITE_AD\",\r\n      \"old_domain_password\":\"Testabc!23\",\r\n      \"domain_password\":\"Sdrszab?45\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/workspaces",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"workspaces"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Workspace Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "03dbbfda-2e8e-4c1b-affb-c2ea97bf0366",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying the Product List\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/workspaces",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"workspaces"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Product List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "da301de5-93a8-4ef4-8bd9-002021cfd183",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating a Desktops\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/products",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Desktops",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8b855158-5a6c-46d8-b221-8cae318edfd9",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"desktop_job_id\", jsonData.job_id);",
+							"",
+							"console.log(\"desktop_job_id: \", pm.variables.get(\"desktop_job_id\"));",
+							"",
+							"setTimeout(function(){}, 1200000);",
+							"",
+							"postman.setNextRequest(\"Get Desktop Status\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"desktops\":[\r\n      {\r\n         \"user_name\":\"todel_desk_1\",\r\n         \"user_group\":\"Administrators\",\r\n         \"user_email\":\"test@test.com\",\r\n         \"product_id\":\"workspace.c2.large.windows\",\r\n         \"computer_name\":\"test\",\r\n         \"root_volume\":{\r\n            \"type\":\"SSD\",\r\n            \"size\":80\r\n         },\r\n         \"nics\":[\r\n            {\r\n               \"subnet_id\":\"{{subnet_id_2}}\"\r\n            }\r\n         ],\r\n         \"availability_zone\":\"eu-west-0b\"\r\n      }\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Desktop Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f5f09438-34fc-42dc-a93a-de826407d118",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"desktop_status\", jsonData.status);",
+							"",
+							"",
+							"pm.test(\"Desktop status check\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"pm.globals.set(\"desktop_id\", jsonData.sub_jobs[0].entities.desktop_id);",
+							"",
+							"postman.setNextRequest(\"Restarting Desktop\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/workspace-jobs/{{desktop_job_id}}",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"workspace-jobs",
+						"{{desktop_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restarting Desktop",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c844527c-5639-4d31-a7af-e507ed7eef62",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 120000);",
+							"",
+							"postman.setNextRequest(\"Shutting Down Desktops\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"reboot\":{\r\n      \"type\":\"SOFT\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops/{{desktop_id}}/action",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops",
+						"{{desktop_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Shutting Down Desktops",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c1d28e78-3211-4128-b19c-c73cac508a4a",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 120000);",
+							"",
+							"postman.setNextRequest(\"Starting Desktop\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-stop\": null\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops/{{desktop_id}}/action",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops",
+						"{{desktop_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Starting Desktop",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fe078a3d-c1ff-401e-a78e-be35c7584e1f",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 160000);",
+							"",
+							"postman.setNextRequest(\"Querying the Desktop List\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-start\": null\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops/{{desktop_id}}/action",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops",
+						"{{desktop_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Desktop List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "929a4d08-c9b5-41dd-a4e7-233c392973b9",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Desktop Details\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops?limit=10&status=ACTIVE",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "status",
+							"value": "ACTIVE"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Desktop Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "31fce50f-3768-42bd-9778-d2e0b4d75c44",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying the Desktop Detail List\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops/{{desktop_id}}",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops",
+						"{{desktop_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Desktop Detail List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "19b3c878-9f73-4593-b1c1-55f090cf2634",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Modifying Desktop Attributes\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops/detail?limit=10&status=ACTIVE",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops",
+						"detail"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "status",
+							"value": "ACTIVE"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying Desktop Attributes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f4e91a48-d8c9-4e16-b32a-ab207f76435d",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 120000);",
+							"",
+							"postman.setNextRequest(\"Modifying Policies\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"desktop\": {\r\n\"computer_name\": \"todel_Newdesk_1\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops/{{desktop_id}}",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops",
+						"{{desktop_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying Desktop Specifications KO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ebee0a2f-d814-43ec-bc6c-0e6c9c8c002a",
+						"type": "text/javascript",
+						"exec": [
+							"//postman.setNextRequest(\"Modifying Policies\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{      \r\n   \"product_id\": \"workspace.c2.large.windows.1\"\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops/09f713ec-6344-4204-84fc-b5ec34796db4/resize",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops",
+						"09f713ec-6344-4204-84fc-b5ec34796db4",
+						"resize"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying Policies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "89c508be-d6fb-4dce-a640-741750c096ad",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Policies\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"policies\":{\r\n      \"usb_port_redirection\":{\r\n         \"enable\":false,\r\n         \"options\":{\r\n            \"usb_image_enable\":false,\r\n            \"usb_video_enable\":true,\r\n            \"usb_printer_enable\":false,\r\n            \"usb_storage_enable\":true,\r\n            \"usb_smart_card_enable\":false\r\n         }\r\n      },\r\n      \"printer_redirection\":{\r\n         \"enable\":true,\r\n         \"options\":{\r\n            \"sync_client_default_printer_enable\":false,\r\n            \"universal_printer_driver\":\"Universal Printing PCL 6\"\r\n         }\r\n      },\r\n      \"file_redirection\":{\r\n         \"redirection_mode\":\"READ_AND_WRITE\",\r\n         \"options\":{\r\n            \"fixed_drive_enable\":true,\r\n            \"removable_drive_enable\":false,\r\n            \"cd_rom_drive_enable\":true,\r\n            \"network_drive_enable\":true\r\n         }\r\n      },\r\n      \"clipboard_redirection\":\"TWO_WAY_ENABLED\",\r\n      \"hdp_plus\":{\r\n         \"hdp_plus_enable\":false,\r\n         \"display_level\":\"QUALITY_FIRST\",\r\n         \"options\":{\r\n            \"bandwidth\":24315,\r\n            \"frame_rate\":18,\r\n            \"video_frame_rate\":20,\r\n            \"smoothing_factor\":58,\r\n            \"lossy_compression_quality\":88\r\n         }\r\n      }\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/policies",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"policies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Policies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cb9342b1-5afd-44f8-b70b-4ff52e048630",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying the Desktop User List\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/policies",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"policies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Desktop User List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5235a348-91f5-40db-b3f3-eb21233f1082",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Desktop User Login Records\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktop-users",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktop-users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Desktop User Login Records",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "27278ab7-66b9-4839-bdfe-e2fa46bda98f",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting Desktops\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktop-users/login-records",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktop-users",
+						"login-records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting Desktops",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bcbc8ac8-b563-4420-9868-81201dfa9d16",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 120000);",
+							"postman.setNextRequest(\"Canceling Workspace\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/desktops/{{desktop_id}}",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"desktops",
+						"{{desktop_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Canceling Workspace",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6892e751-d102-4965-becf-f8185108deb2",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"workspace_delete_job_id\", jsonData.job_id);",
+							"",
+							"setTimeout(function(){}, 120000);",
+							"",
+							"postman.setNextRequest(\"Get Workspace Delete Status\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/workspaces",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"workspaces"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Workspace Delete Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e332575a-9309-4579-9d1c-bc16c08e5360",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"workspace_delete_status\", jsonData.status);",
+							"",
+							"",
+							"pm.test(\"Workspace delete status check\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"postman.setNextRequest(null);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://workspace.{{region}}.{{base_url}}/v1.0/{{project_id}}/workspace-jobs/{{workspace_delete_job_id}}",
+					"protocol": "https",
+					"host": [
+						"workspace",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"{{project_id}}",
+						"workspace-jobs",
+						"{{workspace_delete_job_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "1467c48d-fb35-47f6-b555-56f3e26e8d44",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "461263ad-910b-4ce0-9d16-5427e431b5e8",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});"
+				]
+			}
+		}
+	]
+}

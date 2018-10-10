@@ -1,0 +1,2973 @@
+{
+	"info": {
+		"_postman_id": "fdb04ddd-9166-496c-b06d-8f7185ce1f09",
+		"name": "RDS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f1e18810-f6e7-4abd-91af-88dea9a9978f",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Querying the API Version List\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the API Version List",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "8428a8d5-ee50-489f-a0d8-9be84e63d77a",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_api_version_id\", jsonData.versions[0].id);",
+							"",
+							"console.log(\"rds_api_version_id: \", pm.variables.get(\"rds_api_version_id\"));",
+							"",
+							"postman.setNextRequest(\"Querying API Version Information\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying API Version Information",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "37f9fa65-21a4-4709-a71f-d4d7e8451808",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Obtaining Database Versions Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Database Versions Mysql",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0bef8f80-89b2-4078-8188-b73633c71cfc",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"mysql_type\", \"MySQL\");"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "241dcfd8-c2ed-4761-9fbd-8bc34098caa4",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_datastore_id\", jsonData.dataStores[0].id);",
+							"",
+							"console.log(\"rds_datastore_id: \", pm.variables.get(\"rds_datastore_id\"));",
+							"",
+							"",
+							"pm.globals.set(\"rds_datastore_name\", jsonData.dataStores[0].name);",
+							"",
+							"console.log(\"rds_datastore_name: \", pm.variables.get(\"rds_datastore_name\"));",
+							"",
+							"postman.setNextRequest(\"Obtaining Database Versions SQL Server\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/datastores/{{mysql_type}}/versions",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"datastores",
+						"{{mysql_type}}",
+						"versions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Database Versions SQL Server",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "bf0f6a4d-a5b4-404d-af10-3050561eed1c",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"sqlserver_type\", \"SQLServer\");"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "44f46303-1e89-4609-9553-7ab4c17e0d83",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_sqlserver_datastore_id\", jsonData.dataStores[0].id);",
+							"",
+							"console.log(\"rds_sqlserver_datastore_id: \", pm.variables.get(\"rds_sqlserver_datastore_id\"));",
+							"",
+							"",
+							"pm.globals.set(\"rds_sqlserver_datastore_name\", jsonData.dataStores[0].name);",
+							"",
+							"console.log(\"rds_sqlserver_datastore_name: \", pm.variables.get(\"rds_sqlserver_datastore_name\"));",
+							"",
+							"postman.setNextRequest(\"Obtaining a Parameter List Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/datastores/{{sqlserver_type}}/versions",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"datastores",
+						"{{sqlserver_type}}",
+						"versions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Database Versions PostgresSQL",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "31a6196f-2fa9-4b4c-9b36-0490670ac548",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"postgressql_type\", \"PostgreSQL\");"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "019eaa6d-3637-4e86-a38b-0ca2319549d5",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"postgres_sql_datastore_id\", jsonData.dataStores[0].id);",
+							"",
+							"console.log(\"postgres_sql_datastore_id: \", pm.variables.get(\"postgres_sql_datastore_id\"));",
+							"",
+							"",
+							"pm.globals.set(\"postgres_sqlserver_datastore_name\", jsonData.dataStores[0].name);",
+							"",
+							"console.log(\"postgres_sqlserver_datastore_name: \", pm.variables.get(\"postgres_sqlserver_datastore_name\"));",
+							"",
+							"//postman.setNextRequest(\"Obtaining a Parameter List Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/datastores/{{postgressql_type}}/versions",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"datastores",
+						"{{postgressql_type}}",
+						"versions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining a Parameter List Mysql",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f4d0ba6b-e6c2-4d21-846e-37473a65ef0b",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_parameter_name\", jsonData[\"configuration-parameters\"][0].name);",
+							"",
+							"console.log(\"rds_parameter_name: \", pm.variables.get(\"rds_parameter_name\"));",
+							"",
+							"postman.setNextRequest(\"Obtaining a Parameter List SQL Server\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/datastores/versions/{{rds_datastore_id}}/parameters",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"datastores",
+						"versions",
+						"{{rds_datastore_id}}",
+						"parameters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining a Parameter List SQL Server",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7fe7dedb-828a-456b-bb17-cf4e61beef7c",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_sqlserver_parameter_name\", jsonData[\"configuration-parameters\"][0].name);",
+							"",
+							"console.log(\"rds_sqlserver_parameter_name: \", pm.variables.get(\"rds_sqlserver_parameter_name\"));",
+							"",
+							"postman.setNextRequest(\"Obtaining Configuration Parameters Information\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/datastores/versions/{{rds_sqlserver_datastore_id}}/parameters",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"datastores",
+						"versions",
+						"{{rds_sqlserver_datastore_id}}",
+						"parameters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining a Parameter List PostgresSQL",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7f5ff047-b1a5-4251-a63d-4fd634d8bffe",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"postgressql_parameter_name\", jsonData[\"configuration-parameters\"][0].name);",
+							"",
+							"console.log(\"postgressql_parameter_name: \", pm.variables.get(\"postgressql_parameter_name\"));",
+							"",
+							"//postman.setNextRequest(\"Obtaining Configuration Parameters Information\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/datastores/versions/{{postgres_sql_datastore_id}}/parameters",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"datastores",
+						"versions",
+						"{{postgres_sql_datastore_id}}",
+						"parameters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Configuration Parameters Information",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "80155f42-c5d3-4098-a79e-c46dbf188765",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Obtaining All DB Instance Specifications Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/datastores/versions/{{rds_datastore_id}}/parameters/{{rds_parameter_name}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"datastores",
+						"versions",
+						"{{rds_datastore_id}}",
+						"parameters",
+						"{{rds_parameter_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining All DB Instance Specifications Mysql",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f5cc8bde-784e-4479-a68f-6287eecc9c4d",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_flavor_id\", jsonData.flavors[1].id);",
+							"",
+							"console.log(\"rds_flavor_id: \", pm.variables.get(\"rds_flavor_id\"));",
+							"",
+							"pm.globals.set(\"rds_flavor_id2\", jsonData.flavors[2].id);",
+							"",
+							"console.log(\"rds_flavor_id2: \", pm.variables.get(\"rds_flavor_id2\"));",
+							"",
+							"postman.setNextRequest(\"Obtaining All DB Instance Specifications SQL Server\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/flavors?dbId={{rds_datastore_id}}&region={{region}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"flavors"
+					],
+					"query": [
+						{
+							"key": "dbId",
+							"value": "{{rds_datastore_id}}"
+						},
+						{
+							"key": "region",
+							"value": "{{region}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining All DB Instance Specifications SQL Server",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "03aa2b54-ea64-4538-b535-87d7e6e62ad6",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_sqlserver_flavor_id\", jsonData.flavors[2].id);",
+							"",
+							"console.log(\"rds_sqlserver_flavor_id: \", pm.variables.get(\"rds_sqlserver_flavor_id\"));",
+							"",
+							"pm.globals.set(\"rds_sqlserver_flavor_id2\", jsonData.flavors[0].id);",
+							"",
+							"console.log(\"rds_sqlserver_flavor_id2: \", pm.variables.get(\"rds_sqlserver_flavor_id2\"));",
+							"",
+							"postman.setNextRequest(\"Obtaining a Specified DB Instance Specifications\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/flavors?dbId={{rds_sqlserver_datastore_id}}&region={{region}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"flavors"
+					],
+					"query": [
+						{
+							"key": "dbId",
+							"value": "{{rds_sqlserver_datastore_id}}"
+						},
+						{
+							"key": "region",
+							"value": "{{region}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining All DB Instance Specifications PostgresSQL",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "a1717b03-adbd-45b1-924a-1b4a21f5797e",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_postgresql_flavor_id\", jsonData.flavors[2].id);",
+							"",
+							"console.log(\"rds_postgresql_flavor_id: \", pm.variables.get(\"rds_sqlserver_flavor_id\"));",
+							"",
+							"pm.globals.set(\"rds_postgresql_flavor_id2\", jsonData.flavors[0].id);",
+							"",
+							"console.log(\"rds_postgresql_flavor_id2: \", pm.variables.get(\"rds_sqlserver_flavor_id2\"));",
+							"",
+							"postman.setNextRequest(\"Obtaining a Specified DB Instance Specifications\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/flavors?dbId={{postgres_sql_datastore_id}}&region={{region}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"flavors"
+					],
+					"query": [
+						{
+							"key": "dbId",
+							"value": "{{postgres_sql_datastore_id}}"
+						},
+						{
+							"key": "region",
+							"value": "{{region}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining a Specified DB Instance Specifications",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "19aabe6b-a1cc-4fc9-b5eb-8b61b625a1d3",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Creating a DB Instance Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/flavors/{{rds_flavor_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"flavors",
+						"{{rds_flavor_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining a DB Instance List",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "a03cd282-297a-476f-b748-6cf635bf9ab9",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_instance_id\", jsonData.instance.id);",
+							"",
+							"console.log(\"rds_instance_id: \", pm.variables.get(\"rds_instance_id\"));",
+							"",
+							"setTimeout(function(){}, 120000);",
+							"postman.setNextRequest(\"Creating a DB Instance SQL Server\");",
+							"",
+							"//Te~s!t@1#2%3^4*5-6_7=8+9?"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"instance\":{\r\n      \"name\":\"todelete_test-api-instance-{{$randomInt}}\",\r\n      \"datastore\":{\r\n         \"type\":\"{{mysql_type}}\",\r\n         \"version\":\"{{rds_datastore_name}}\"\r\n      },\r\n      \"flavorRef\":\"{{rds_flavor_id}}\",\r\n      \"volume\":{\r\n         \"type\":\"COMMON\",\r\n         \"size\":100\r\n      },\r\n      \"region\":\"{{region}}\",\r\n      \"availabilityZone\":\"{{region}}b\",\r\n      \"vpc\":\"{{vpc_id_1}}\",\r\n      \"nics\":{\r\n         \"subnetId\":\"{{subnet_id_1}}\"\r\n      },\r\n      \"securityGroup\":{\r\n         \"id\":\"{{security_group_default_id}}\"\r\n      },\r\n      \"dbPort\":8635,\r\n      \"backupStrategy\":{\r\n         \"startTime\":\"01:00:00\",\r\n         \"keepDays\":3\r\n      },\r\n      \"dbRtPd\":\"Test@123456789\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a DB Instance Mysql",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "a03cd282-297a-476f-b748-6cf635bf9ab9",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_instance_id\", jsonData.instance.id);",
+							"",
+							"console.log(\"rds_instance_id: \", pm.variables.get(\"rds_instance_id\"));",
+							"",
+							"setTimeout(function(){}, 120000);",
+							"postman.setNextRequest(\"Creating a DB Instance SQL Server\");",
+							"",
+							"//Te~s!t@1#2%3^4*5-6_7=8+9?"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"instance\":{\r\n      \"name\":\"todelete_test-api-instance-{{$randomInt}}\",\r\n      \"datastore\":{\r\n         \"type\":\"{{mysql_type}}\",\r\n         \"version\":\"{{rds_datastore_name}}\"\r\n      },\r\n      \"flavorRef\":\"{{rds_flavor_id}}\",\r\n         \"type\":\"COMMON\",\r\n         \"size\":100\r\n      },\r\n      \"region\":\"{{region}}\",\r\n      \"availabilityZone\":\"{{region}}b\",\r\n      \"vpc\":\"{{vpc_id_1}}\",\r\n      \"nics\":{\r\n         \"subnetId\":\"{{subnet_id_1}}\"\r\n      },\r\n      \"securityGroup\":{\r\n         \"id\":\"{{security_group_default_id}}\"\r\n      },\r\n      \"dbPort\":8635,\r\n      \"backupStrategy\":{\r\n         \"startTime\":\"01:00:00\",\r\n         \"keepDays\":3\r\n      },\r\n      \"dbRtPd\":\"Test@123456789\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a DB Instance SQL Server",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e1fbafbd-b396-4002-80ea-b8e4899571fa",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_sqlserver_instance_id\", jsonData.instance.id);",
+							"",
+							"console.log(\"rds_sqlserver_instance_id: \", pm.variables.get(\"rds_sqlserver_instance_id\"));",
+							"",
+							"setTimeout(function(){}, 820000);",
+							"postman.setNextRequest(\"Obtaining Detailed Information of a Specified DB Instance Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"instance\":{\r\n      \"name\":\"todelete_test-api-instance-{{$randomInt}}\",\r\n      \"datastore\":{\r\n         \"type\":\"{{sqlserver_type}}\",\r\n         \"version\":\"{{rds_sqlserver_datastore_name}}\"\r\n      },\r\n      \"flavorRef\":\"{{rds_sqlserver_flavor_id}}\",\r\n      \"volume\":{\r\n         \"type\":\"COMMON\",\r\n         \"size\":100\r\n      },\r\n      \"region\":\"{{region}}\",\r\n      \"availabilityZone\":\"{{region}}b\",\r\n      \"vpc\":\"{{vpc_id_1}}\",\r\n      \"nics\":{\r\n         \"subnetId\":\"{{subnet_id_1}}\"\r\n      },\r\n      \"securityGroup\":{\r\n         \"id\":\"{{security_group_default_id}}\"\r\n      },\r\n      \"dbPort\":8635,\r\n      \"backupStrategy\":{\r\n         \"startTime\":\"01:00:00\",\r\n         \"keepDays\":3\r\n      },\r\n      \"dbRtPd\":\"Test@123\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a DB Instance PostgresSQL Server",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "9d74c4e8-b6a9-4237-b849-3ddc555c6f01",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_postgressql_instance_id\", jsonData.instance.id);",
+							"",
+							"console.log(\"rds_postgressql_instance_id: \", pm.variables.get(\"rds_postgressql_instance_id\"));",
+							"",
+							"setTimeout(function(){}, 820000);",
+							"postman.setNextRequest(\"Obtaining Detailed Information of a Specified DB Instance Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"instance\":{\r\n      \"name\":\"todelete_test-api-instance-{{$randomInt}}\",\r\n      \"datastore\":{\r\n         \"type\":\"{{sqlserver_type}}\",\r\n         \"version\":\"{{rds_postgres_sqlserver_datastore_name}}\"\r\n      },\r\n      \"flavorRef\":\"{{rds_postgresql_flavor_id}}\",\r\n      \"volume\":{\r\n         \"type\":\"COMMON\",\r\n         \"size\":100\r\n      },\r\n      \"region\":\"{{region}}\",\r\n      \"availabilityZone\":\"{{region}}b\",\r\n      \"vpc\":\"{{vpc_id_1}}\",\r\n      \"nics\":{\r\n         \"subnetId\":\"{{subnet_id_1}}\"\r\n      },\r\n      \"securityGroup\":{\r\n         \"id\":\"{{security_group_default_id}}\"\r\n      },\r\n      \"dbPort\":8635,\r\n      \"backupStrategy\":{\r\n         \"startTime\":\"01:00:00\",\r\n         \"keepDays\":3\r\n      },\r\n      \"dbRtPd\":\"Test@123\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Detailed Information of a Specified DB Instance Mysql",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d50f15ff-a130-4369-863b-5eb972a8c5bf",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1ac7afa8-0ca0-49b4-9462-de131c2bb2eb",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_instance_status\", jsonData.instance.status);",
+							"",
+							"if ( pm.variables.get(\"rds_instance_status\") == \"ACTIVE\") {",
+							"    console.log(\"rds_instance_status: ACTIVE \");",
+							"    postman.setNextRequest(\"Obtaining Detailed Information of a Specified DB Instance SQL Server\");",
+							"}else if (pm.variables.get(\"rds_instance_status\") == \"FAILED\"){",
+							"    console.log(\"rds_instance_status: FAILED \");",
+							"}else{",
+							"    console.log(\"rds_instance_status: \", pm.variables.get(\"rds_instance_status\"));",
+							"    setTimeout(function(){}, 60000);",
+							"    postman.setNextRequest(\"Obtaining Detailed Information of a Specified DB Instance Mysql\");",
+							"} "
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Detailed Information of a Specified DB Instance SQL Server",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d50f15ff-a130-4369-863b-5eb972a8c5bf",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7facfcc2-27c8-4058-b72d-ae19614b3d34",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_sqlserver_instance_status\", jsonData.instance.status);",
+							"",
+							"if ( pm.variables.get(\"rds_sqlserver_instance_status\") == \"ACTIVE\") {",
+							"    console.log(\"rds_sqlserver_instance_status: ACTIVE \");",
+							"    postman.setNextRequest(\"Changing DB Instance Volume\");",
+							"}else if (pm.variables.get(\"rds_sqlserver_instance_status\") == \"FAILED\"){",
+							"    console.log(\"rds_sqlserver_instance_status: FAILED \");",
+							"}else{",
+							"    console.log(\"rds_sqlserver_instance_status: \", pm.variables.get(\"rds_sqlserver_instance_status\"));",
+							"    setTimeout(function(){}, 60000);",
+							"    postman.setNextRequest(\"Obtaining Detailed Information of a Specified DB Instance SQL Server\");",
+							"} "
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_sqlserver_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_sqlserver_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Detailed Information of a Specified DB Instance Postgres SQL 3",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d50f15ff-a130-4369-863b-5eb972a8c5bf",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7facfcc2-27c8-4058-b72d-ae19614b3d34",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_sqlserver_instance_status\", jsonData.instance.status);",
+							"",
+							"if ( pm.variables.get(\"rds_sqlserver_instance_status\") == \"ACTIVE\") {",
+							"    console.log(\"rds_sqlserver_instance_status: ACTIVE \");",
+							"    postman.setNextRequest(\"Changing DB Instance Volume\");",
+							"}else if (pm.variables.get(\"rds_sqlserver_instance_status\") == \"FAILED\"){",
+							"    console.log(\"rds_sqlserver_instance_status: FAILED \");",
+							"}else{",
+							"    console.log(\"rds_sqlserver_instance_status: \", pm.variables.get(\"rds_sqlserver_instance_status\"));",
+							"    setTimeout(function(){}, 60000);",
+							"    postman.setNextRequest(\"Obtaining Detailed Information of a Specified DB Instance SQL Server\");",
+							"} "
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_postgressql_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_postgressql_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Changing DB Instance Volume",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "5390c2ac-e840-41f3-97be-7b531b51ff06",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 300000);",
+							"  ",
+							"postman.setNextRequest(\"Changing DB Instance Specifications\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"resize\":{\r\n      \"volume\":{\r\n         \"size\":200\r\n      }\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}/action",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Changing DB Instance Specifications",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "8d3ea60a-2a45-4f79-8023-c4f4a7cbf65b",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 600000);",
+							"",
+							"postman.setNextRequest(\"Obtaining a DB Instance List\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"resize\":{\r\n      \"flavorRef\":\"{{rds_flavor_id2}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}/action",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining a DB Instance List",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "6ad82158-2820-4596-9c6f-9a9f17b52350",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Setting Configuration Parameters\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Setting Configuration Parameters",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "a3df45c3-7a55-4698-8553-488715269594",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 30000);",
+							"postman.setNextRequest(\"Restoring Parameters to Their Default Values\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"values\":{\r\n      \"sync_frm\":\"OFF\",\r\n      \"autocommit\":\"OFF\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}/parameters",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}",
+						"parameters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restoring Parameters to Their Default Values",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "430d3885-58cd-4423-a36a-c3649f625fce",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 30000);",
+							"postman.setNextRequest(\"Rebooting a DB Instance\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}/parameters/default",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}",
+						"parameters",
+						"default"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rebooting a DB Instance",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "02fbded0-423d-4830-8914-3ce988b32f94",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 120000);",
+							"  ",
+							"postman.setNextRequest(\"Setting the Automated Backup Policy\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}/action",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Setting the Automated Backup Policy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "47da71bc-dce6-4947-aa92-f045ae3cc2e7",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Obtaining the Automated Backup Policy\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"policy\":{\r\n      \"keepday\":7,\r\n      \"starttime\":\"00:00:00\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}/backups/policy",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}",
+						"backups",
+						"policy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining the Automated Backup Policy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "54787e94-19be-4cd8-a6c9-004013f49fda",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating a Snapshot\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"policy\":{\r\n      \"keepday\":7,\r\n      \"starttime\":\"00:00:00\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}/backups/policy",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}",
+						"backups",
+						"policy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Snapshot",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "67e14059-8387-493d-aa35-5c470dc3866f",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_snapshot_id\", jsonData.backup.id);",
+							"",
+							"console.log(\"rds_snapshot_id: \", pm.variables.get(\"rds_snapshot_id\"));",
+							"",
+							"setTimeout(function(){}, 120000);",
+							"",
+							"postman.setNextRequest(\"Returning Snapshot Information As a List\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"backup\":{\r\n      \"description\":\"description\",\r\n      \"instance\":\"{{rds_instance_id}}\",\r\n      \"name\":\"to_delete_test_API_Backup-{{$randomInt}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/backups",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"backups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Returning Snapshot Information As a List",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7171013d-784a-4953-b13c-7e0bbd5e1004",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"postman.setNextRequest(\"Restoring a Specified DB Instance\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"backup\":{\r\n      \"description\":\"My Backup\",\r\n      \"instance\":\"44b277eb-39be-4921-be31-3d61b43651d7\",\r\n      \"name\":\"snapshot\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/backups",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"backups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restoring a Specified DB Instance",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7604b168-1f9c-4e52-a091-9682867b2337",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 120000);",
+							"",
+							"postman.setNextRequest(\"Restoring Data to a New DB Instance\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restore\":{\r\n      \"backupRef\":\"{{rds_snapshot_id}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}/action",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restoring Data to a New DB Instance",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "70f1b7f6-3f75-4ccf-a930-746ace3ecb90",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_new_instance_id\", jsonData.instance.id);",
+							"",
+							"console.log(\"rds_new_instance_id: \", pm.variables.get(\"rds_new_instance_id\"));",
+							"",
+							"setTimeout(function(){}, 720000);",
+							"postman.setNextRequest(\"Obtaining Detailed Information of New DB Instance\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"instance\":{\r\n      \"name\":\"to_delete_newinstance_{{rds_snapshot_id}}_{{$randomInt}}\",\r\n      \"flavorRef\":\"{{rds_flavor_id}}\",\r\n      \"volume\":{\r\n         \"size\":200\r\n      },\r\n      \"restorePoint\":{\r\n         \"backupRef\":\"{{rds_snapshot_id}}\",\r\n         \"sourceInstanceId\":\"{{rds_instance_id}}\"\r\n      }\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining Detailed Information of New DB Instance",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d50f15ff-a130-4369-863b-5eb972a8c5bf",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "cdd6b152-0218-4e01-beaa-1982e710fb14",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_new_instance_status\", jsonData.instance.status);",
+							"",
+							"if ( pm.variables.get(\"rds_new_instance_status\") == \"ACTIVE\") {",
+							"    console.log(\"rds_new_instance_status: ACTIVE \");",
+							"    postman.setNextRequest(\"Deleting Snapshot Information\");",
+							"} else if ( pm.variables.get(\"rds_new_instance_status\") == \"FAILED\") {",
+							"    console.log(\"status: FAILED \");",
+							"    postman.setNextRequest(null);",
+							"    return;",
+							"} else {",
+							"    console.log(\"rds_new_instance_status: \", pm.variables.get(\"rds_new_instance_status\"));",
+							"    setTimeout(function(){}, 60000);",
+							"    postman.setNextRequest(\"Obtaining Detailed Information of New DB Instance\");",
+							"} "
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"restart\":{}\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_new_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_new_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting Snapshot Information",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "23d4b48b-5797-438e-82e7-bde147952f5a",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Database Error Logs\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/backups/{{rds_snapshot_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"backups",
+						"{{rds_snapshot_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Database Error Logs",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "daffbcc4-e352-4577-bd9d-4d3d73b1520f",
+						"type": "text/javascript",
+						"exec": [
+							"var d = new Date();",
+							"var date = d.toISOString().split('T')[0]",
+							"",
+							"",
+							"pm.globals.set(\"rds_date\", date);",
+							"console.log(\"rds_date: \", pm.variables.get(\"rds_date\"));",
+							"",
+							"//pm.globals.set(\"rds_end_date\", d);",
+							"",
+							"//startDate:2018-02-16+18%3A55",
+							"//endDate:2018-02-16+18%3A56"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "c7261a00-1bd6-43f2-9dca-2c34c5bfc0b7",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Database Slow Query Logs\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"instance\":{\r\n      \"name\":\"trove-newinstance\",\r\n      \"flavorRef\":\"bf07a6d4-844a-4023-a776-fc5c5fb71fb4\",\r\n      \"volume\":{\r\n         \"size\":100\r\n      },\r\n      \"restorePoint\":{\r\n         \"backupRef\":\"2f4ddb93-b901-4b08-93d8-1d2e472f30fe\",\r\n         \"sourceInstanceId\":\"0bc7300c-dc63-45d4-aa3b-d85bf577baac\"\r\n      }\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_new_instance_id}}/errorlog?startDate={{rds_date}}+11%3A37&endDate={{rds_date}}+11%3A38&curPage=1&perPage=10",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_new_instance_id}}",
+						"errorlog"
+					],
+					"query": [
+						{
+							"key": "startDate",
+							"value": "{{rds_date}}+11%3A37"
+						},
+						{
+							"key": "endDate",
+							"value": "{{rds_date}}+11%3A38"
+						},
+						{
+							"key": "curPage",
+							"value": "1"
+						},
+						{
+							"key": "perPage",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Database Slow Query Logs",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "02343477-8c61-46e6-be40-eb78d7ab5f34",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1ebd6bbf-8a35-44b4-9a51-9c6d4c513402",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a DB Instance Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"instance\":{\r\n      \"name\":\"trove-newinstance\",\r\n      \"flavorRef\":\"bf07a6d4-844a-4023-a776-fc5c5fb71fb4\",\r\n      \"volume\":{\r\n         \"size\":100\r\n      },\r\n      \"restorePoint\":{\r\n         \"backupRef\":\"2f4ddb93-b901-4b08-93d8-1d2e472f30fe\",\r\n         \"sourceInstanceId\":\"0bc7300c-dc63-45d4-aa3b-d85bf577baac\"\r\n      }\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}/slowlog?sftype=&top=10",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}",
+						"slowlog"
+					],
+					"query": [
+						{
+							"key": "sftype",
+							"value": ""
+						},
+						{
+							"key": "top",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a DB Instance Mysql",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "2862957d-dfb4-4c5a-8b4e-ac6bb7e8082c",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_delete_job_id\", jsonData.extendparam.jobs.id);",
+							"",
+							"console.log(\"rds_delete_job_id: \", pm.variables.get(\"rds_delete_job_id\"));",
+							"",
+							"postman.setNextRequest(\"Deleting a DB Instance SQL Server\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"keepLastManualBackup\":\"0\"\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a DB Instance SQL Server",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "c221391a-ff25-4e1d-a680-125bf96947b3",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_delete_sqlserver_job_id\", jsonData.extendparam.jobs.id);",
+							"",
+							"console.log(\"rds_delete_sqlserver_job_id: \", pm.variables.get(\"rds_delete_sqlserver_job_id\"));",
+							"",
+							"postman.setNextRequest(\"Deleting the new DB Instance Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"keepLastManualBackup\":\"0\"\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_sqlserver_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_sqlserver_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a DB Instance Postgres SQL",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "c221391a-ff25-4e1d-a680-125bf96947b3",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_delete_sqlserver_job_id\", jsonData.extendparam.jobs.id);",
+							"",
+							"console.log(\"rds_delete_sqlserver_job_id: \", pm.variables.get(\"rds_delete_sqlserver_job_id\"));",
+							"",
+							"postman.setNextRequest(\"Deleting the new DB Instance Mysql\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"keepLastManualBackup\":\"0\"\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_postgressql_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_postgressql_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting the new DB Instance Mysql",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "4bbae3f8-dbca-40ec-9b75-b3b5124680d7",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"rds_delete_job_id2\", jsonData.extendparam.jobs.id);",
+							"",
+							"console.log(\"rds_delete_job_id2: \", pm.variables.get(\"rds_delete_job_id2\"));",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Language",
+						"value": "en-us"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"keepLastManualBackup\":\"0\"\r\n}"
+				},
+				"url": {
+					"raw": "https://rds.{{region}}.{{base_url}}/rds/{{rds_api_version_id}}/{{project_id}}/instances/{{rds_new_instance_id}}",
+					"protocol": "https",
+					"host": [
+						"rds",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"rds",
+						"{{rds_api_version_id}}",
+						"{{project_id}}",
+						"instances",
+						"{{rds_new_instance_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "80040893-65c4-41ce-9e32-19f50eb42218",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "d977fe01-6d7a-49ea-8bcf-946cd88ab157",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"setTimeout(function(){}, 1000);"
+				]
+			}
+		}
+	]
+}

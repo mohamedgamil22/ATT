@@ -1,0 +1,500 @@
+{
+	"info": {
+		"name": "Svtg",
+		"_postman_id": "3b408f0f-865a-d560-a9b6-421faced6561",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Querying a Template List",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/templates",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"templates"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Stack List",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/stacks",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"stacks"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Stack",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/stacks/{{stack_id}}",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"stacks",
+						"{{stack_id}}"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Stack topology",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/stacks/{{stack_id}}/context",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"stacks",
+						"{{stack_id}}",
+						"context"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Stack Output Information",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/stacks/{{stack_id}}/output",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"stacks",
+						"{{stack_id}}",
+						"output"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Stack input Information",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/stacks/{{stack_id}}/intput",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"stacks",
+						"{{stack_id}}",
+						"intput"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Stack Node Resources",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/stacks/{{stack_id}}/node_resources",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"stacks",
+						"{{stack_id}}",
+						"node_resources"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Stack Element List",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/stacks/{{stack_id}}/nodes",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"stacks",
+						"{{stack_id}}",
+						"nodes"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Stack Element",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/stacks/{{stack_id}}/nodes/{{node_id}}",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"stacks",
+						"{{stack_id}}",
+						"nodes",
+						"{{node_id}}"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Input Parameters of a Template",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/templates/{{template_id}}inputs",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"templates",
+						"{{template_id}}inputs"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		},
+		{
+			"name": "Updating a Template",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n   \"name\": \"secndtemplate\",  \r\n   \"description\": \"to test the updated query\",  \r\n   \"version\": \"1.0\"  \r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/templates/{{template_id}}",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"templates",
+						"{{template_id}}"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Stack",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"description": "token generé validité "
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"name\": \"redis\",  \r\n  \"project_id\": \"10556c2112784111b8bf10512591189e\",  \r\n  \"cluster_id\": \"5418ADE1-FE13-4441-0F04-7C6024A150B3\",  \r\n  \"namespace\" : \"om\",  \r\n  \"labels\": {  \r\n    \"labelkey1\": \"labelvalue1\"  \r\n  },  \r\n  \"template_id\": \"541C79E1-FEF3-4441-0E04-7C6273A150C3\"  \r\n}"
+				},
+				"url": {
+					"raw": "https://aos.eu-west-0.cloud-ocb.orange-business.com/v2/aos/stacks",
+					"protocol": "https",
+					"host": [
+						"aos",
+						"eu-west-0",
+						"cloud-ocb",
+						"orange-business",
+						"com"
+					],
+					"path": [
+						"v2",
+						"aos",
+						"stacks"
+					]
+				},
+				"description": "to automate CCE API"
+			},
+			"response": []
+		}
+	]
+}

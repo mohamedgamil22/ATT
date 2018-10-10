@@ -1,0 +1,1961 @@
+{
+	"info": {
+		"_postman_id": "2cef236e-0301-4a55-931d-717a34f434ba",
+		"name": "AS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0cfd8468-84d1-400f-bcb0-53f26d09eaac",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Creating an AS Configuration\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an AS Configuration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9f87f89b-a0dc-4f54-a42c-cdaa8c126bba",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"as_conf_id\", jsonData.scaling_configuration_id);",
+							"",
+							"console.log(\"as_conf_id: \", pm.variables.get(\"as_conf_id\"));",
+							"",
+							"setTimeout(function(){}, 10000);",
+							"",
+							"postman.setNextRequest(\"Creating an AS Configuration N2\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"scaling_configuration_name\":\"todelete_as-config-{{$randomInt}}\",\r\n   \"instance_config\":{\r\n      \"flavorRef\":\"s3.medium.4\",\r\n      \"imageRef\":\"{{coreOS_1298_id}}\",\r\n      \"disk\":[\r\n         {\r\n            \"size\":40,\r\n            \"volume_type\":\"SATA\",\r\n            \"disk_type\":\"SYS\"\r\n         }\r\n      ],\r\n      \"key_name\":\"{{key_name}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_configuration",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_configuration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an AS Configuration N2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b50e9c22-2686-4869-a493-87f21d93aaee",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"as_conf_id2\", jsonData.scaling_configuration_id);",
+							"",
+							"console.log(\"as_conf_id2: \", pm.variables.get(\"as_conf_id2\"));",
+							"",
+							"setTimeout(function(){}, 10000);",
+							"",
+							"postman.setNextRequest(\"Creating an AS Configuration N3\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"scaling_configuration_name\":\"todelete_as-config-{{$randomInt}}\",\r\n   \"instance_config\":{\r\n      \"flavorRef\":\"s3.medium.4\",\r\n      \"imageRef\":\"{{coreOS_1298_id}}\",\r\n      \"disk\":[\r\n         {\r\n            \"size\":40,\r\n            \"volume_type\":\"SATA\",\r\n            \"disk_type\":\"SYS\"\r\n         }\r\n      ],\r\n      \"key_name\":\"{{key_name}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_configuration",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_configuration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an AS Configuration N3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0c82cc25-5e43-4e2e-a630-b6a0b4d48595",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"as_conf_id3\", jsonData.scaling_configuration_id);",
+							"",
+							"console.log(\"as_conf_id3: \", pm.variables.get(\"as_conf_id3\"));",
+							"",
+							"setTimeout(function(){}, 10000);",
+							"",
+							"postman.setNextRequest(\"Querying AS Configurations\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"scaling_configuration_name\":\"todelete_as-config-{{$randomInt}}\",\r\n   \"instance_config\":{\r\n      \"flavorRef\":\"s3.medium.4\",\r\n      \"imageRef\":\"{{coreOS_1298_id}}\",\r\n      \"disk\":[\r\n         {\r\n            \"size\":40,\r\n            \"volume_type\":\"SATA\",\r\n            \"disk_type\":\"SYS\"\r\n         }\r\n      ],\r\n      \"key_name\":\"{{key_name}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_configuration",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_configuration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying AS Configurations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d276bded-5c1d-4ca7-8c82-ce52ec1a4607",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying AS Configuration Details\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_configuration",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_configuration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying AS Configuration Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f2b1fd64-4aa0-48c4-bec5-11b875fca376",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating an AS Group\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_configuration/{{as_conf_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_configuration",
+						"{{as_conf_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "af14f39c-ad12-4ba9-8248-656684cda115",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"as_group_id\", jsonData.scaling_group_id);",
+							"",
+							"console.log(\"as_group_id: \", pm.variables.get(\"as_group_id\"));",
+							"",
+							"setTimeout(function(){}, 10000);",
+							"",
+							"postman.setNextRequest(\"Modifying an AS Group\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"scaling_group_name\":\"todelete_as-GroupName-{{$randomInt}}\",\r\n   \"scaling_configuration_id\":\"{{as_conf_id}}\",\r\n   \"desire_instance_number\":0,\r\n   \"min_instance_number\":0,\r\n   \"max_instance_number\":0,\r\n   \"cool_down_time\":200,\r\n   \"health_periodic_audit_method\":\"NOVA_AUDIT\",\r\n   \"health_periodic_audit_time\":\"5\",\r\n   \"instance_terminate_policy\":\"OLD_CONFIG_OLD_INSTANCE\",\r\n   \"vpc_id\":\"{{vpc_id_1}}\",\r\n   \"networks\":[\r\n      {\r\n         \"id\":\"{{subnet_id_1}}\"\r\n      }\r\n   ],\r\n   \"notifications\":[\r\n      \"EMAIL\"\r\n   ],\r\n   \"security_groups\":[\r\n      {\r\n         \"id\":\"{{security_group_default_id}}\"\r\n      }\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1abc5599-b8be-41f4-a6a2-4ac3a32454a5",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Enabling or Disabling an AS Group\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"scaling_group_name\":\"todelete_as-NewGroupName-{{$randomInt}}\",\r\n   \"scaling_configuration_id\":\"{{as_conf_id}}\",\r\n   \"desire_instance_number\":1,\r\n   \"min_instance_number\":0,\r\n   \"max_instance_number\":1,\r\n   \"cool_down_time\":200\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group/{{as_group_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group",
+						"{{as_group_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Enabling or Disabling an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "439f5fba-57a3-43b1-a3dd-d2ed566e0c7d",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying AS Groups\");",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"action\":\"resume\"\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group/{{as_group_id}}/action",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group",
+						"{{as_group_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying AS Groups",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d61df900-1647-4667-990f-5c191d75b736",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying AS Group Details\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying AS Group Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4be708fe-0bfc-4604-9af4-37e1857de49a",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating an AS Policy\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group/{{as_group_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group",
+						"{{as_group_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an AS Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1548e115-5156-4755-bbcc-f956eeb4be04",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"as_policy_id\", jsonData.scaling_policy_id);",
+							"",
+							"console.log(\"as_policy_id: \", pm.variables.get(\"as_policy_id\"));",
+							"",
+							"setTimeout(function(){}, 10000);",
+							"",
+							"postman.setNextRequest(\"Modifying an AS Policy\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"scaling_policy_name\":\"todelete_as-policy-{{$randomInt}}\",\r\n   \"scaling_policy_action\":{\r\n      \"operation\":\"ADD\",\r\n      \"instance_number\":1\r\n   },\r\n   \"cool_down_time\":900,\r\n   \"scheduled_policy\":{\r\n      \"launch_time\":\"2022-12-25T23:59Z\"\r\n   },\r\n   \"scaling_policy_type\":\"SCHEDULED\",\r\n   \"scaling_group_id\":\"{{as_group_id}}\"\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_policy",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_policy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying an AS Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "52e2692a-4c4d-4772-9bf0-720c448b2c50",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying AS Policies\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"scaling_policy_type\":\"SCHEDULED\",\r\n   \"scaling_policy_name\":\"todelete_new_as-policy-{{$randomInt}}\",\r\n   \"scheduled_policy\":{\r\n      \"launch_time\":\"2023-01-01T00:01Z\"\r\n   },\r\n   \"scaling_policy_action\":{\r\n      \"operation\":\"SET\",\r\n      \"instance_number\":1\r\n   },\r\n   \"cool_down_time\":300\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_policy/{{as_policy_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_policy",
+						"{{as_policy_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying AS Policies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "76c99285-69b9-451b-ad8c-810a11405005",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying AS Policy Details\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_policy/{{as_group_id}}/list",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_policy",
+						"{{as_group_id}}",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying AS Policy Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d35bfdda-12ae-48f3-87ff-9488f53cdc49",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Executing, Enabling, or Disabling an AS Policy\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_policy/{{as_policy_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_policy",
+						"{{as_policy_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Executing, Enabling, or Disabling an AS Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "864b84cc-5fe6-4c4c-89b7-5fb9b3222e55",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 60000);",
+							"postman.setNextRequest(\"Querying Scaling Action Logs\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"action\":\"execute\"\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_policy/{{as_policy_id}}/action",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_policy",
+						"{{as_policy_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Scaling Action Logs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "000a27a4-8ad9-46d1-8b9c-e8d89ca3e802",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying AS Quotas\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_activity_log/{{as_group_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_activity_log",
+						"{{as_group_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying AS Quotas",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "38fb0acf-befa-4447-ba35-e0071c9cf29c",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Quotas for AS Policies and AS Instances\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/quotas",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"quotas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Quotas for AS Policies and AS Instances",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e42abdcd-2697-42ed-8d4a-cccb5318c80f",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Create topic for AS Group\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/quotas/{{as_group_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"quotas",
+						"{{as_group_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create topic for AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "82f9038a-f076-47db-90f0-aa2e17674966",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"topic_urn_as\", jsonData.topic_urn);",
+							"",
+							"console.log(\"topic_urn_as: \", pm.variables.get(\"topic_urn_as\"));",
+							"",
+							"setTimeout(function(){}, 5000);",
+							"",
+							"postman.setNextRequest(\"Enabling Notification for an AS Group\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"name\": \"todelete_Test-API-AS_topic_{{$timestamp}}\",\r\n\"display_name\": \"tes\\nttest\"\r\n}"
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Enabling Notification for an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "afe8dd4f-308f-45bb-8ba7-a12f9cf13fb9",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 10000);",
+							"",
+							"postman.setNextRequest(\"Querying an AS Group Notification List\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"topic_urn\":\"{{topic_urn_as}}\",\r\n   \"topic_scene\":[\r\n      \"SCALING_UP\",\r\n      \"SCALING_UP_FAIL\",\r\n      \"SCALING_DOWN\",\r\n      \"SCALING_DOWN_FAIL\",\r\n      \"SCALING_GROUP_ABNORMAL\"\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_notification/{{as_group_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_notification",
+						"{{as_group_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying an AS Group Notification List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f5a74976-e2e2-45fc-9192-30f0a618cb8f",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating a Lifecycle Hook\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_notification/{{as_group_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_notification",
+						"{{as_group_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Lifecycle Hook",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a9c9bb39-82a0-470e-82c7-b418a7606d59",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"as_hook_name\", jsonData.lifecycle_hook_name);",
+							"",
+							"console.log(\"as_hook_name: \", pm.variables.get(\"as_hook_name\"));",
+							"",
+							"setTimeout(function(){}, 5000);",
+							"",
+							"postman.setNextRequest(\"Querying Lifecycle Hooks\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"lifecycle_hook_name\":\"todelete_test-hook-{{$randomInt}}\",\r\n   \"default_result\":\"ABANDON\",\r\n   \"default_timeout\":3600,\r\n   \"notification_topic_urn\":\"{{topic_urn_as}}\",\r\n   \"lifecycle_hook_type\":\"INSTANCE_LAUNCHING\"\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_lifecycle_hook/{{as_group_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_lifecycle_hook",
+						"{{as_group_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Lifecycle Hooks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "75066a87-bfd1-4b17-959c-7c498d699187",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Lifecycle Hook Details\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_lifecycle_hook/{{as_group_id}}/list",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_lifecycle_hook",
+						"{{as_group_id}}",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Lifecycle Hook Details",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7e5afcf2-ffc7-4e42-872d-ff6b06bc8861",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Modifying a Lifecycle Hook\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_lifecycle_hook/{{as_group_id}}/{{as_hook_name}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_lifecycle_hook",
+						"{{as_group_id}}",
+						"{{as_hook_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Lifecycle Hook",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6462d838-2945-454b-a038-9523b2e59d67",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 5000);",
+							"",
+							"postman.setNextRequest(\"Querying Instance Suspension\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"default_result\":\"CONTINUE\"\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_lifecycle_hook/{{as_group_id}}/{{as_hook_name}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_lifecycle_hook",
+						"{{as_group_id}}",
+						"{{as_hook_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Instance Suspension",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a3c87cc9-db80-489b-af73-36033abd73a9",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Instances in an AS Group\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_instance_hook/{{as_group_id}}/list",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_instance_hook",
+						"{{as_group_id}}",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Instances in an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "df2be6d4-1971-480f-8f36-75af46fc1b35",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"as_group_instance_id\", jsonData.scaling_group_instances[0].instance_id);",
+							"",
+							"console.log(\"as_group_instance_id: \", pm.variables.get(\"as_group_instance_id\"));",
+							"",
+							"setTimeout(function(){}, 5000);",
+							"",
+							"postman.setNextRequest(\"Performing Operations on Instances in Batches\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group_instance/{{as_group_id}}/list",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group_instance",
+						"{{as_group_id}}",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Performing Operations on Instances in Batches",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "53c755a0-ffc7-4f2a-b34e-68ed3c51f2f5",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a Lifecycle Hook\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"action\":\"UNPROTECT\",\r\n   \"instances_id\":[\r\n      \"{{as_group_instance_id}}\"\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group_instance/{{as_group_id}}/action",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group_instance",
+						"{{as_group_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Lifecycle Hook",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "83bdd34c-e8e8-4e52-b586-2dbd5ba538c4",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a Notification for an AS Group\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_lifecycle_hook/{{as_group_id}}/{{as_hook_name}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_lifecycle_hook",
+						"{{as_group_id}}",
+						"{{as_hook_name}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Notification for an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3dbfc8ab-d625-4a1d-9d4a-589ff05851a1",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Delete Topic for AS Group\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_notification/{{as_group_id}}/{{topic_urn_as}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_notification",
+						"{{as_group_id}}",
+						"{{topic_urn_as}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Topic for AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "94ba52e0-1b4c-4427-868e-943e9f5caa7f",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Removing Instances from an AS Group\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://smn.{{region}}.{{base_url}}/v2/{{project_id}}/notifications/topics/{{topic_urn_as}}",
+					"protocol": "https",
+					"host": [
+						"smn",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"notifications",
+						"topics",
+						"{{topic_urn_as}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Removing Instances from an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "689de8d8-d367-4f96-ac97-bcdb0440d576",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 80000);",
+							"",
+							"postman.setNextRequest(\"Deleting an AS Policy\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group_instance/{{as_group_instance_id}}?instance_delete=yes",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group_instance",
+						"{{as_group_instance_id}}"
+					],
+					"query": [
+						{
+							"key": "instance_delete",
+							"value": "yes"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an AS Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "86587ec3-bb33-4dde-9d85-6c91ea571c1e",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting an AS Group\");",
+							"",
+							"setTimeout(function(){}, 10000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_policy/{{as_policy_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_policy",
+						"{{as_policy_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an AS Group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d6b316f9-e01b-4822-b532-855be00e79ac",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting an AS Configuration\");",
+							"",
+							"setTimeout(function(){}, 10000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_group/{{as_group_id}}?\nforce_delete=no",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_group",
+						"{{as_group_id}}"
+					],
+					"query": [
+						{
+							"key": "\nforce_delete",
+							"value": "no"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an AS Configuration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cae0b92c-2f5f-4f82-b3f9-061782184af5",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Batch Deleting AS Configurations\");",
+							"",
+							"setTimeout(function(){}, 10000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_configuration/{{as_conf_id}}",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_configuration",
+						"{{as_conf_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Batch Deleting AS Configurations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dcbd3c53-ee27-4273-96b5-be9c19b1aab4",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(null);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"scaling_configuration_id\":[\r\n      \"{{as_conf_id2}}\",\r\n      \"{{as_conf_id3}}\"\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://as.{{region}}.{{base_url}}/autoscaling-api/v1/{{tenant_id}}/scaling_configurations",
+					"protocol": "https",
+					"host": [
+						"as",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"autoscaling-api",
+						"v1",
+						"{{tenant_id}}",
+						"scaling_configurations"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "b4591a85-b5fc-4b3f-81d2-b1c0b59860ed",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "d79713f0-2e04-4e22-88f1-44f5cfb95c75",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Checking result code is part of 200, 201, 202, 204, 300\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204,300]);",
+					"});",
+					"",
+					"if (pm.response.code != 200 && pm.response.code != 201 && pm.response.code != 202 && pm.response.code != 204 && pm.response.code != 300) {",
+					"    console.log(\"body: \" + request.data);",
+					"    console.log(\"responseBody: \" + responseBody);",
+					"}"
+				]
+			}
+		}
+	]
+}

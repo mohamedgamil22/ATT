@@ -1,0 +1,126 @@
+{
+	"info": {
+		"_postman_id": "dd2610eb-ced8-4b2f-b276-825d712aa1bd",
+		"name": "DPS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "IAM Get Token ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "db272c24-68a7-4de0-b343-38fad16c5525",
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"postman.setGlobalVariable(\"X-Subject-Token\", postman.getResponseHeader(\"X-Subject-Token\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n   \"auth\":{  \r\n      \"identity\":{  \r\n         \"methods\":[  \r\n            \"password\"\r\n         ],\r\n         \"password\":{  \r\n            \"user\":{  \r\n               \"name\":\"issaaliosanda\",\r\n               \"password\":\"OCBcloud@2018\",\r\n               \"domain\":{  \r\n                  \"name\":\"issaaliosanda\"\r\n               }\r\n            }\r\n         }\r\n      },\r\n      \"scope\":{  \r\n         \"project\":{  \r\n            \"name\":\"eu-west-0\"\r\n         }\r\n      }\r\n   }\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://iam.{{region}}.{{base_url}}:443/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"iam",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"port": "443",
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stop-pipelines",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n\"pipelineId\": \r\n\"ea20acff-9eec-409b-bb68-db5870bac755\"\r\n} \r\n"
+				},
+				"url": {
+					"raw": "https://dps.{{region}}.{{base_url}}/v1.0/05c9d3435d2a44669844a6f034e8796b/pipelines/stop-pipeline",
+					"protocol": "https",
+					"host": [
+						"dps",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"pipelines",
+						"stop-pipeline"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "run-pipelines",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n\"pipelineId\": \r\n\"ea20acff-9eec-409b-bb68-db5870bac755\"\r\n} \r\n"
+				},
+				"url": {
+					"raw": "https://dps.{{region}}.{{base_url}}/v1.0/05c9d3435d2a44669844a6f034e8796b/pipelines/run-pipeline",
+					"protocol": "https",
+					"host": [
+						"dps",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"pipelines",
+						"run-pipeline"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

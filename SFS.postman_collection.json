@@ -1,0 +1,916 @@
+{
+	"info": {
+		"name": "SFS",
+		"_postman_id": "433ad741-73f5-4632-8505-a31a2695f684",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "998b17ae-994f-482f-a771-723c689e4f0f",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Querying All API Versions\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Querying All API Versions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "abea9a79-126f-4284-8ea2-e68b78b057bc",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Details About API Versions\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"test_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About API Versions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fc1939e0-0d9d-400d-bca7-20ef1d13cf8a",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating a Shared File System\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"test_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						""
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Shared File System",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a8a2018c-62af-4b31-9127-712a51beaf29",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"share_id\", jsonData.share.id);",
+							"",
+							"console.log(\"share_id: \", pm.variables.get(\"share_id\"));",
+							"",
+							"postman.setNextRequest(\"Modifying a Shared File System\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"Test-API-SFS_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test_description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Shared File System",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d5c31c90-f07f-4ac4-9ba5-00f03bef01ad",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Adding a Share Access Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"display_name\":\"Test-API-SFS_new_display_name_{{$timestamp}}\",\r\n      \"display_description\":\"new_description_{{$guid}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/{{share_id}}",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"{{share_id}}"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Adding a Share Access Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "75043251-3e56-432e-b5a0-2dd25a2ad76b",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"access_id\", jsonData.access.id);",
+							"",
+							"console.log(\"access_id: \", pm.variables.get(\"access_id\"));",
+							"",
+							"postman.setNextRequest(\"Querying a Share Access Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"os-allow_access\":{\r\n      \"access_to\":\"{{vpc_id}}\",\r\n      \"access_type\":\"cert\",\r\n      \"access_level\":\"rw\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/{{share_id}}/action",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"{{share_id}}",
+						"action"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Share Access Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "01c5c8ad-7e27-4012-b8d8-50d0df64464d",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Expanding a Shared File System\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"os-access_list\": null\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/{{share_id}}/action",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"{{share_id}}",
+						"action"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Expanding a Shared File System",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2e6c79c4-084d-4dde-889f-d783bf327c81",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Shrinking a Shared File System\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"os-extend\":{\r\n      \"new_size\":3\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/{{share_id}}/action",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"{{share_id}}",
+						"action"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Shrinking a Shared File System",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b54cbabe-1888-4dca-8616-c1f389946145",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying All Shared File Systems\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"os-shrink\":{\r\n      \"new_size\":2\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/{{share_id}}/action",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"{{share_id}}",
+						"action"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Querying All Shared File Systems",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c20a761e-17c7-4640-ac10-00ec62019599",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Details About All Shared File Systems\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"test_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares?\nall_tenants=1&status=available&limit=2&offset=0&sort_key=id&sort_dir=asc&is_public=false&all_tenants=1",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares"
+					],
+					"query": [
+						{
+							"key": "\nall_tenants",
+							"value": "1",
+							"equals": true
+						},
+						{
+							"key": "status",
+							"value": "available",
+							"equals": true
+						},
+						{
+							"key": "limit",
+							"value": "2",
+							"equals": true
+						},
+						{
+							"key": "offset",
+							"value": "0",
+							"equals": true
+						},
+						{
+							"key": "sort_key",
+							"value": "id",
+							"equals": true
+						},
+						{
+							"key": "sort_dir",
+							"value": "asc",
+							"equals": true
+						},
+						{
+							"key": "is_public",
+							"value": "false",
+							"equals": true
+						},
+						{
+							"key": "all_tenants",
+							"value": "1",
+							"equals": true
+						}
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About All Shared File Systems",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dc9a3d2a-29c8-46dc-9261-cb532ad06b0b",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Details About a Shared File System\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"test_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/detail?\nall_tenants=1&status=available&limit=2&offset=0&sort_key=id&sort_dir=asc&is_public=false&all_tenants=1",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"detail"
+					],
+					"query": [
+						{
+							"key": "\nall_tenants",
+							"value": "1",
+							"equals": true
+						},
+						{
+							"key": "status",
+							"value": "available",
+							"equals": true
+						},
+						{
+							"key": "limit",
+							"value": "2",
+							"equals": true
+						},
+						{
+							"key": "offset",
+							"value": "0",
+							"equals": true
+						},
+						{
+							"key": "sort_key",
+							"value": "id",
+							"equals": true
+						},
+						{
+							"key": "sort_dir",
+							"value": "asc",
+							"equals": true
+						},
+						{
+							"key": "is_public",
+							"value": "false",
+							"equals": true
+						},
+						{
+							"key": "all_tenants",
+							"value": "1",
+							"equals": true
+						}
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About a Shared File System",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6a6aba52-7f1e-41d8-a301-bfa4e18928bd",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Export Locations of a Shared File System\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"test_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/{{share_id}}",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"{{share_id}}"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Export Locations of a Shared File System",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ff690858-082e-451a-a1e6-1a4522713268",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Quota Management\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "X-Openstack-Manila-Api-Version",
+						"value": "2.9"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"test_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/{{share_id}}/export_locations",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"{{share_id}}",
+						"export_locations"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Quota Management",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7351e7e5-9a3c-4454-8a5c-7bd7fb166ce3",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a Share Access Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"share\":{\r\n      \"share_type\":null,\r\n      \"name\":\"test_{{$timestamp}}\",\r\n      \"snapshot_id\":null,\r\n      \"description\":\"test description_{{$guid}}\",\r\n      \"metadata\":{\r\n         \"key1\":\"value{{$randomInt}}\",\r\n         \"key2\":\"value{{$randomInt}}\"\r\n      },\r\n      \"share_proto\":\"NFS\",\r\n      \"share_network_id\":null,\r\n      \"size\":1,\r\n      \"is_public\":false\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/os-quota-sets/{{project_id}}",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"os-quota-sets",
+						"{{project_id}}"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Share Access Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bfa46a43-9006-4cd9-b5eb-947dbb2dfbd5",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting a Shared File System\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"os-deny_access\":{\r\n      \"access_id\":\"{{access_id}}\"\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/{{share_id}}/action",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"{{share_id}}",
+						"action"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Shared File System",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "343aa253-1090-4dbd-930f-b23ecb507df3",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(null);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://sfs.{{region}}.{{base_url}}/v2/{{project_id}}/shares/{{share_id}}",
+					"protocol": "https",
+					"host": [
+						"sfs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"shares",
+						"{{share_id}}"
+					]
+				},
+				"description": null
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "19037ea3-91e5-4a4f-9688-46cc8361c9f7",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "e8596c0a-231e-446a-bce0-ac9a6854e9d7",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,300]);",
+					"});",
+					"",
+					"// Wait 3 seconds before executing next request",
+					"setTimeout(function(){}, 2000);"
+				]
+			}
+		}
+	]
+}

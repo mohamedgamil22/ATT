@@ -1,0 +1,1681 @@
+{
+	"info": {
+		"_postman_id": "79b0eca7-894d-4f1b-9ac4-45e774ae211c",
+		"name": "ECS-Huawei",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9fb7866c-7027-4c02-983f-62a3d05fa54c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "0b490bef-3484-4dfe-ae82-c4b4f62cf705",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating ECSs",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6612696-af7a-4b0f-9da7-debcce8505fb",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "69bb191e-8b72-477b-9cb7-7ca7f42ffe44",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_create_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_create_job_id: \", pm.variables.get(\"ecs_create_job_id\"));",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 130000);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"server\": {\n    \"name\": \"toDelete-Test-API-ECS-{{$randomInt}}\",\n    \"flavorRef\": \"{{flavor_type}}\",\n    \"imageRef\": \"{{ubuntu_16_id}}\",\n    \"vpcid\": \"{{vpc_id_1}}\",\n    \"nics\": [\n      {\n        \"subnet_id\": \"{{subnet_id_1}}\"\n      }\n    ],\n    \"root_volume\": {\n      \"volumetype\": \"SATA\"\n    },\n    \"availability_zone\": \"{{region}}a\",\n    \"key_name\": \"{{key_name}}\"\n  }\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Creation",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "2fe8895f-2a47-4389-8f1a-053c8e705509",
+						"exec": [
+							"pm.test(\"ECS creation\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"ecs_server_id\", jsonData.entities.sub_jobs[0].entities.server_id);",
+							"console.log(\"ecs_server_id: \", pm.variables.get(\"ecs_server_id\"));",
+							"postman.setNextRequest(\"Querying Status ECS Stop\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_create_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_create_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stopping ECSs in Batches",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6612696-af7a-4b0f-9da7-debcce8505fb",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "81aab633-afec-4e97-898e-35e270ce7188",
+						"exec": [
+							"/*var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_stop_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_stop_job_id: \", pm.variables.get(\"ecs_stop_job_id\"));",
+							"",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 90000);",
+							"*/"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-stop\": {\r\n\"type\":\"HARD\",\r\n\"servers\": [\r\n{\r\n\"id\": \"{{ecs_server_id}}\"\r\n}\r\n]\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Stop",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7f6fee4d-9740-42ce-a640-4101d942550c",
+						"exec": [
+							"/*pm.test(\"ECS stop\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"*/"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_stop_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_stop_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying the Specifications of an ECS",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6612696-af7a-4b0f-9da7-debcce8505fb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "01e0b216-fa86-415a-a2f2-3e7062515f16",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_resize_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_resize_job_id: \", pm.variables.get(\"ecs_resize_job_id\"));",
+							"",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 160000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"resize\": {\r\n\"flavorRef\": \"t2.micro\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/{{ecs_server_id}}/resize",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"{{ecs_server_id}}",
+						"resize"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Resize",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "5a028a41-9c4a-49bf-a70c-a3c89ff6e266",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"ECS resize\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_resize_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_resize_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Starting ECSs in Batches",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6612696-af7a-4b0f-9da7-debcce8505fb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "fae8f8ab-419e-4492-874e-ebb9d072d7bd",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_start_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_start_job_id: \", pm.variables.get(\"ecs_start_job_id\"));",
+							"",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 90000);",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-start\": {\r\n\"servers\": [\r\n{\r\n\"id\": \"{{ecs_server_id}}\"\r\n}\r\n]\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Start",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b506a602-620e-42d5-975e-24a19c8a3dd3",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"ECS start\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_start_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_start_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restarting ECSs in Batches",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6612696-af7a-4b0f-9da7-debcce8505fb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "7569aa2b-a4d1-409e-a277-c2726d603993",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_restart_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_restart_job_id: \", pm.variables.get(\"ecs_restart_job_id\"));",
+							"",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 90000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"reboot\":{\r\n      \"type\":\"SOFT\",\r\n      \"servers\":[\r\n         {\r\n            \"id\":\"{{ecs_server_id}}\"\r\n         }\r\n      ]\r\n   }\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Restart",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "02afd7fc-e695-4bc2-8491-48bd5bf96305",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"ECS restart\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_restart_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_restart_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reinstalling an ECS OS KO",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6612696-af7a-4b0f-9da7-debcce8505fb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d7e5390f-7f35-4bdd-a709-a61e64d98360",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-reinstall\": {\r\n\"keyname\": \"{{key_name}}\",\r\n\"userid\": \"7e25b1da389f4697a79df3a0e5bd494e\",\r\n\"metadata\": {\r\n\"BYOL\": \"false\"\r\n}\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/cloudservers/{{ecs_server_id}}/reinstallos",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"cloudservers",
+						"{{ecs_server_id}}",
+						"reinstallos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Changing an ECS OS KO",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6612696-af7a-4b0f-9da7-debcce8505fb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d7e5390f-7f35-4bdd-a709-a61e64d98360",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"os-reinstall\": {\r\n\"keyname\": \"KeyPair-350b\",\r\n\"userid\": \"7e25b1da389f4697a79df3a0e5bd494e\",\r\n\"metadata\": {\r\n\"BYOL\": \"false\"\r\n}\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v2/{{tenant_id}}/cloudservers/{{ecs_server_id}}/changeos",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{tenant_id}}",
+						"cloudservers",
+						"{{ecs_server_id}}",
+						"changeos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding an ECS to the Monitoring List KO",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6612696-af7a-4b0f-9da7-debcce8505fb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d7e5390f-7f35-4bdd-a709-a61e64d98360",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"monitorMetrics\" : null\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1.0/servers/{{ecs_server_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1.0",
+						"servers",
+						"{{ecs_server_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Specifications and Expansion Details About ECSs",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/flavors",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"flavors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding NICs to an ECS in Batches",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a6612696-af7a-4b0f-9da7-debcce8505fb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d989937d-b111-410e-9880-5a77943d92a6",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_add_nic_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_add_nic_job_id: \", pm.variables.get(\"ecs_add_nic_job_id\"));",
+							"",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json;charset=utf8"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"nics\": [\r\n{\r\n\"subnet_id\": \"{{network_id_1}}\",\r\n\"security_groups\": [\r\n{\r\n\"id\": \"{{security_group_default_id}}\"\r\n}\r\n]\r\n}\r\n]\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/{{ecs_server_id}}/nics",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"{{ecs_server_id}}",
+						"nics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Add NIC",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "07e06afc-83a2-403d-9601-1733afed554b",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"ECS add NIC\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_nic_id\", jsonData.entities.sub_jobs[0].entities.nic_id);",
+							"console.log(\"ecs_nic_id: \", pm.variables.get(\"ecs_nic_id\"));",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_add_nic_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_add_nic_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting NICs from an ECS in Batches",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "18f97033-681e-4e23-a4ea-eaa95e36d114",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_del_nic_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_del_nic_job_id: \", pm.variables.get(\"ecs_del_nic_job_id\"));",
+							"",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"nics\": [\r\n{\r\n\"id\": \"{{ecs_nic_id}}\"\r\n}\r\n]\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/{{ecs_server_id}}/nics/delete",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"{{ecs_server_id}}",
+						"nics",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Del NIC",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "26db6ad9-dde0-45b2-afab-f6963a5e0442",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"ECS del NIC\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_del_nic_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_del_nic_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Attaching a Disk to an ECS",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "dbeddea3-0b49-45a4-8b6b-4b6f705ef3d9",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_add_disk_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_add_disk_job_id: \", pm.variables.get(\"ecs_add_disk_job_id\"));",
+							"",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"volumeAttachment\": {\r\n\"volumeId\": \"{{evs_id_1}}\",\r\n\"device\": \"/dev/sdd\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/{{ecs_server_id}}/attachvolume",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"{{ecs_server_id}}",
+						"attachvolume"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Attach Disk",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "6855b153-f8a6-4746-b863-5b73d405e27d",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"ECS add disk\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_add_disk_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_add_disk_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Detaching an EVS Disk from an ECS",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1bed0ce3-1db3-4d22-80fc-74ea4cdf8b29",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_del_disk_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_del_disk_job_id: \", pm.variables.get(\"ecs_del_disk_job_id\"));",
+							"",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/{{ecs_server_id}}/detachvolume/{{evs_id_1}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"{{ecs_server_id}}",
+						"detachvolume",
+						"{{evs_id_1}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Detach Disk",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "2765d8d9-b118-421b-8455-597f14352752",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"ECS del disk\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_del_disk_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_del_disk_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying the Tenant Quota",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/limits",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"limits"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Automatic Recovery of an ECS",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/{{ecs_server_id}}/autorecovery",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"{{ecs_server_id}}",
+						"autorecovery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Managing Automatic Recovery of an ECS",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"support_auto_recovery\": \"false\"\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/{{ecs_server_id}}/autorecovery",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"{{ecs_server_id}}",
+						"autorecovery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting ECSs",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "a47ac60e-7273-4919-87a4-a7cb977e63de",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"ecs_del_job_id\", jsonData.job_id);",
+							"console.log(\"ecs_del_job_id: \", pm.variables.get(\"ecs_del_job_id\"));",
+							"",
+							"",
+							"// Wait few seconds before executing next request",
+							"setTimeout(function(){}, 60000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"servers\":[\r\n      {\r\n         \"id\":\"{{ecs_server_id}}\"\r\n      }\r\n   ],\r\n   \"delete_publicip\":true,\r\n   \"delete_volume\":true\r\n}"
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/cloudservers/delete",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"cloudservers",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Status ECS Delete",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1d3a39ce-1900-4b52-a9eb-b40b6c71d1ae",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "2f967020-422f-4857-bb1f-c2829fad6f4f",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"ECS delete\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ecs.{{region}}.{{base_url}}/v1/{{tenant_id}}/jobs/{{ecs_del_job_id}}",
+					"protocol": "https",
+					"host": [
+						"ecs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{tenant_id}}",
+						"jobs",
+						"{{ecs_del_job_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "7ebffa53-e366-4a87-9390-218d096f3373",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "aa73c48e-9ae2-42f4-a0c9-4a813749af78",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					"",
+					"// Wait few seconds before executing next request",
+					"setTimeout(function(){}, 3000);"
+				]
+			}
+		}
+	]
+}

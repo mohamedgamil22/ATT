@@ -1,0 +1,1205 @@
+{
+	"info": {
+		"_postman_id": "fdbee1aa-9ab8-4d58-8e49-1873a25fb11e",
+		"name": "VBS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a6e8316b-e5e5-463d-b41a-944ff80a291e",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an EVS Disk",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "69b75837-2ad1-4cda-9e45-5ee69fdbd878",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"job_id\", jsonData.job_id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"volume\": {\r\n     \"count\": 1,\r\n     \"description\": \"todelete_Test_API_VBS\",\r\n     \"availability_zone\": \"eu-west-0a\",\r\n     \"size\": 10,\r\n     \"name\": \"todelete_Test_API_EVS_01-{{$randomInt}}\",\r\n     \"volume_type\": \"SATA\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudvolumes",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudvolumes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check EVS disk status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "426825fd-c249-40a6-9d0a-86b8d6136660",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"if (jsonData.status === \"SUCCESS\") {",
+							"    console.log(\"Job succeeded!!!\");",
+							"    pm.globals.set(\"volume_id\", jsonData.entities.volume_id);",
+							"} else if (jsonData.status === \"INIT\") {",
+							"    console.log(\"Job initialization...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 5000);",
+							"    postman.setNextRequest(\"Check EVS disk status\");",
+							"} else if (jsonData.status === \"RUNNING\") {",
+							"    console.log(\"Job still running...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 5000);",
+							"    postman.setNextRequest(\"Check EVS disk status\");",
+							"} else {",
+							"    console.log(\"Job failed!\");",
+							"    console.log(\"responseBody: \", responseBody);",
+							"    postman.setNextRequest(null);",
+							"    tests[\"Creating an EVS disk\"] = responseCode.code === 9999999;",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{job_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating VBS backup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "10866c67-bc2f-498c-ac7c-2fd3f830c43c",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"job_id\", jsonData.job_id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"backup\": {\r\n\"volume_id\": \"{{volume_id}}\",\r\n\"name\": \"todelete-Test-API-VBS-{{$randomInt}}\",\r\n\"description\": \"Backup Test API\"}\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudbackups",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudbackups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check VBS Backup status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "58378223-9567-4179-945e-c17e26d99edb",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"if (jsonData.status === \"SUCCESS\") {",
+							"    console.log(\"Job succeeded!!!\");",
+							"    pm.globals.set(\"backup_id\", jsonData.entities.backup_id);",
+							"} else if (jsonData.status === \"INIT\") {",
+							"    console.log(\"Job initialization...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 5000);",
+							"    postman.setNextRequest(\"Check VBS Backup status\");",
+							"} else if (jsonData.status === \"RUNNING\") {",
+							"    console.log(\"Job still running...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 15000);",
+							"    postman.setNextRequest(\"Check VBS Backup status\");",
+							"} else {",
+							"    console.log(\"Job failed!\");",
+							"    console.log(\"responseBody: \", responseBody);",
+							"    postman.setNextRequest(null);",
+							"    tests[\"Creating VBS backup\"] = responseCode.code === 9999999;",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{job_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an EVS Snapshot (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "82feca72-9fd9-4e23-b546-2b7b208f33ee",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"snapshot_id\", jsonData.snapshot.id);",
+							"setTimeout(function(){}, 10000); "
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"snapshot\": {\r\n\"name\": \"todelete-Test-API-VBS-SNAP-{{$randomInt}}\",\r\n\"description\": \"Daily backup\",\r\n\"volume_id\": \"{{volume_id}}\",\r\n\"force\": false,\r\n\"metadata\": { }\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a VBS Backup (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3fd6a770-23cf-492e-8ba9-fc47e47d9f4c",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"backup_Openstack_id\", jsonData.backup.id);",
+							"setTimeout(function(){}, 200000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"backup\": {\r\n\"volume_id\": \"{{volume_id}}\",\r\n\"snapshot_id\": \"{{snapshot_id}}\",\r\n\"name\": \"todelete-Test-API-Openstack-VBS-{{$randomInt}}\",\r\n\"description\": \"Backup Test API Native Openstack \"}\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backups",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying All Volume Backup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ea7fd48f-b69d-497b-9206-23bc25671a31",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backups",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Detailed Volume Backup",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backups/detail",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backups",
+						"detail"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Details About 1 Volume Backup",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backups/{{backup_Openstack_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backups",
+						"{{backup_Openstack_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Backup Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "18b479ad-59ac-4174-ba33-0fdc1eb4c89c",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"backup_policy_id\", jsonData.backup_policy_id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"backup_policy_name\": \"todelete-Test-API-policy-VBS-{{$randomInt}}\",\r\n\"scheduled_policy\" : {\r\n\"remain_first_backup_of_curMonth\" : \"Y\",\r\n\"rentention_num\" : 10,\r\n\"frequency\" : 1,\r\n\"start_time\" : \"12:00\",\r\n\"status\" : \"ON\"\r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backuppolicy",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backuppolicy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Backup Policies",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "application/json",
+						"value": "application/json",
+						"disabled": true
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backuppolicy",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backuppolicy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifying a Backup Policy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9a45fb35-5884-41bf-962a-bf0ade979f21",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"backup_policy_name\": \"todelete-Test-API-policy-VBS-{{$randomInt}}\",\n\"scheduled_policy\":{\n\"frequency\": 1,\n\"status\": \"ON\",\n\"remain_first_backup_of_curMonth\": \"Y\",\n\"start_time\": \"12:00\"\n}\n}"
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backuppolicy/{{backup_policy_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backuppolicy",
+						"{{backup_policy_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restoring a Disk Using a VBS Backup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2ca9c321-c9d7-4900-b0b5-db5e8dbdbdce",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"restore_vbs_job_id\", jsonData.job_id);",
+							"setTimeout(function(){}, 200000); ",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"restore\":{\r\n\"volume_id\":\"{{volume_id}}\"\r\n}}"
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudbackups/{{backup_id}}/restore",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudbackups",
+						"{{backup_id}}",
+						"restore"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restore Disk Using VBS Backup Job Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0e0da771-9de3-49dd-b959-998b3b92e5a8",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Restore VBS status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{restore_vbs_job_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{restore_vbs_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Restoring a Disk Using a VBS Backup (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "959470b1-2fe3-406c-be7a-5f7b1df33198",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 100000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"restore\":{\r\n\"volume_id\":\"{{volume_id}}\"\r\n}}"
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backups/{{backup_Openstack_id}}/restore",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backups",
+						"{{backup_Openstack_id}}",
+						"restore"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Associating Resources with a Backup Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "15abba67-7acb-418e-8daf-3be89795871a",
+						"type": "text/javascript",
+						"exec": [
+							"setTimeout(function(){}, 20000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					},
+					{
+						"key": "",
+						"value": "",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"backup_policy_id\":\"{{backup_policy_id}}\",\r\n\"resources\":[{\r\n\"resource_id\":\"{{volume_id}}\",\r\n\"resource_type\":\"volume\"\r\n}]\r\n}"
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backuppolicyresources",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backuppolicyresources"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Executing a Backup Policy At Once",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backuppolicy/{{backup_policy_id}}/action",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backuppolicy",
+						"{{backup_policy_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Disassociate Resources from a Backup Policy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"resources\": [\r\n{\r\n\"resource_id\": \"{{volume_id}}\"}\r\n]\r\n}"
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backuppolicyresources/{{backup_policy_id}}/deleted_resources",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backuppolicyresources",
+						"{{backup_policy_id}}",
+						"deleted_resources"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Volume Backup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8347f7ac-1092-476d-a02e-d860f1b54674",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"delete_vb_job_id\", jsonData.job_id);",
+							"setTimeout(function(){}, 5000);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudbackups/{{backup_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudbackups",
+						"{{backup_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Volume Backup Job Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c386d7f8-9656-4030-a7ba-f48e39254eab",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"if (jsonData.status === \"SUCCESS\") {",
+							"    console.log(\"Job succeeded!!!\");",
+							"} else if (jsonData.status === \"INIT\") {",
+							"    console.log(\"Job initialization...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 2000);",
+							"    postman.setNextRequest(\"Check Volume Backup Job Status\");",
+							"} else if (jsonData.status === \"RUNNING\") {",
+							"    console.log(\"Job still running...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 15000);",
+							"    postman.setNextRequest(\"Check Volume Backup Job Status\");",
+							"} else {",
+							"    console.log(\"Job failed!\");",
+							"    console.log(\"responseBody: \", responseBody);",
+							"    postman.setNextRequest(null);",
+							"    tests[\"Creating VBS backup\"] = responseCode.code === 9999999;",
+							"}",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v1/{{project_id}}/jobs/{{delete_vb_job_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"jobs",
+						"{{delete_vb_job_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a VBS Backup (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4814bfff-14d5-4ef1-ae0e-7370eb7dc5cf",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backups/{{backup_Openstack_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backups",
+						"{{backup_Openstack_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting a Backup Policy",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://vbs.{{region}}.{{base_url}}/v2/{{project_id}}/backuppolicy/{{backup_policy_id}}",
+					"protocol": "https",
+					"host": [
+						"vbs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"backuppolicy",
+						"{{backup_policy_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an EVS Snapshot (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "dfeba6bb-0b23-432b-88eb-03207ecaecf3",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/snapshots/{{snapshot_id}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"snapshots",
+						"{{snapshot_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an EVS Disk",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://evs.{{region}}.{{base_url}}/v2/{{project_id}}/cloudvolumes/{{volume_id}}",
+					"protocol": "https",
+					"host": [
+						"evs",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"{{project_id}}",
+						"cloudvolumes",
+						"{{volume_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "95cdcaea-2836-4202-b21c-159697087720",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "f7ff86a8-268c-49bc-93a3-51c7e45255a1",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});",
+					""
+				]
+			}
+		}
+	]
+}

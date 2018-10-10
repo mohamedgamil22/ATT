@@ -1,0 +1,175 @@
+{
+	"info": {
+		"_postman_id": "b373d9e5-4631-40a4-9811-0b5bf19036c4",
+		"name": "DSS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "622d107b-37e9-4baa-ac75-64f4d7726297",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.1 Obtaining Details of a Specific Storage Pool",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0a99b5fd-6d2e-4cf1-9d57-31671d8a0f98",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(\"Querying All Record Sets\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dss.{{region}}.{{base_url}}/v1/{{project_id}}/pools/{{dss_id}}",
+					"protocol": "https",
+					"host": [
+						"dss",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"pools",
+						"{{dss_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3.2 Obtaining the Storage Pool Detail List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0a99b5fd-6d2e-4cf1-9d57-31671d8a0f98",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(\"Querying All Record Sets\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dss.{{region}}.{{base_url}}/v1/{{project_id}}/pools/detail",
+					"protocol": "https",
+					"host": [
+						"dss",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v1",
+						"{{project_id}}",
+						"pools",
+						"detail"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "d6302907-23ad-42ec-99b7-2bbec081d916",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "6bacab91-75a2-4589-8694-96ba6c00a221",
+				"type": "text/javascript",
+				"exec": [
+					"//tests[\"Response time is acceptable\"] = responseTime < 500; // milliseconds",
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202]);",
+					"});"
+				]
+			}
+		}
+	]
+}

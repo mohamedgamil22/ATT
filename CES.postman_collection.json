@@ -1,0 +1,565 @@
+{
+	"info": {
+		"_postman_id": "29366f7e-d86b-4b17-a75a-71a7006e6643",
+		"name": "CES",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "08617ca2-fb2c-486e-89e1-39e67944fd8e",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d551e3f2-8f93-4817-92bd-f1a5c38c340f",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							"postman.setNextRequest(\"Adding Monitoring Data\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding Monitoring Data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "33456a9e-214a-4217-a5fc-9203630ad60f",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Creating an Alarm Rule\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "fb871b5b-c89d-4f92-9601-f180b03fd3f8",
+						"type": "text/javascript",
+						"exec": [
+							"pm.globals.set(\"time\", new Date().getTime() -1000);",
+							"console.log(\"time: \", pm.variables.get(\"time\"));",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "   [\r\n   {\r\n        \"metric\": {\r\n            \"namespace\": \"MY.ECS\",\r\n            \"dimensions\": [\r\n                {\r\n                    \"name\": \"instance_id\",\r\n                    \"value\": \"33328f02-3814-422e-b688-bfdba93d4050\"\r\n                }\r\n            ],\r\n            \"metric_name\": \"mem_util\"\r\n        },\r\n        \"ttl\": 172800,\r\n        \"collect_time\": {{time}},\r\n        \"value\": 60,\r\n        \"unit\": \"%\"\r\n    }\r\n    ]"
+				},
+				"url": {
+					"raw": "https://ces.{{region}}.{{base_url}}/V1.0/{{project_id}}/metric-data",
+					"protocol": "https",
+					"host": [
+						"ces",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"V1.0",
+						"{{project_id}}",
+						"metric-data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating an Alarm Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7c7faa32-8133-412b-91d1-310266c624e4",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"pm.globals.set(\"alarm_id\", jsonData.alarm_id);",
+							"",
+							"console.log(\"alarm_id: \", pm.variables.get(\"alarm_id\"));",
+							"",
+							"postman.setNextRequest(\"Querying Metrics\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"alarm_name\":\"Test-API-CES-alarm_{{$timestamp}}\",\r\n   \"alarm_description\":\"description_{{$guid}}\",\r\n   \"metric\":{\r\n      \"namespace\":\"SYS.ECS\",\r\n      \"dimensions\":[\r\n         {\r\n            \"name\":\"instance_id\",\r\n            \"value\":\"6c2648a1-64f4-472a-b31c-7762ee2b2e17\"\r\n         }\r\n      ],\r\n      \"metric_name\":\"network_outgoing_bytes_rate_inband\"\r\n   },\r\n   \"condition\":{\r\n      \"period\":300,\r\n      \"filter\":\"average\",\r\n      \"comparison_operator\":\">=\",\r\n      \"value\":6,\r\n      \"unit\":\"B/s\",\r\n      \"count\":1\r\n   },\r\n   \"alarm_enabled\":true,\r\n   \"alarm_action_enabled\":true,\r\n   \"insufficientdata_actions\":[\r\n      {\r\n         \"type\":\"notification\",\r\n         \"notificationList\":[\r\n            \"urn:smn:southchina:68438a86d98e427e907e0097b7e35d48:sd\"\r\n         ]\r\n      }\r\n   ]\r\n}"
+				},
+				"url": {
+					"raw": "https://ces.{{region}}.{{base_url}}/V1.0/{{project_id}}/alarms",
+					"protocol": "https",
+					"host": [
+						"ces",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"V1.0",
+						"{{project_id}}",
+						"alarms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Metrics",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "721dda62-2934-49d8-898d-8e3b8d29eb15",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying an Alarm Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ces.{{region}}.{{base_url}}/V1.0/{{project_id}}/metrics",
+					"protocol": "https",
+					"host": [
+						"ces",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"V1.0",
+						"{{project_id}}",
+						"metrics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying an Alarm Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4c491e05-fbec-470e-9fb1-7d72eb1cdcf0",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying a Specific Alarm Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ces.{{region}}.{{base_url}}/V1.0/{{project_id}}/alarms",
+					"protocol": "https",
+					"host": [
+						"ces",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"V1.0",
+						"{{project_id}}",
+						"alarms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying a Specific Alarm Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1b593709-e525-4b26-853e-d6722d6b5f01",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Monitoring Data\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ces.{{region}}.{{base_url}}/V1.0/{{project_id}}/alarms/{{alarm_id}}",
+					"protocol": "https",
+					"host": [
+						"ces",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"V1.0",
+						"{{project_id}}",
+						"alarms",
+						"{{alarm_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Monitoring Data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "da5c8ca8-c407-489e-a0a4-c49a2c83384c",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Querying Quotas\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ces.{{region}}.{{base_url}}/V1.0/{{project_id}}/metric-data?namespace=SYS.ECS&metric_name=mem_util&dim.\n0=instance_id,6c2648a1-64f4-472a-b31c-7762ee2b2e17&from=1516098000&to=1516098300&period=1&filter=sum",
+					"protocol": "https",
+					"host": [
+						"ces",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"V1.0",
+						"{{project_id}}",
+						"metric-data"
+					],
+					"query": [
+						{
+							"key": "namespace",
+							"value": "SYS.ECS"
+						},
+						{
+							"key": "metric_name",
+							"value": "mem_util"
+						},
+						{
+							"key": "dim.\n0",
+							"value": "instance_id,6c2648a1-64f4-472a-b31c-7762ee2b2e17"
+						},
+						{
+							"key": "from",
+							"value": "1516098000"
+						},
+						{
+							"key": "to",
+							"value": "1516098300"
+						},
+						{
+							"key": "period",
+							"value": "1"
+						},
+						{
+							"key": "filter",
+							"value": "sum"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Quotas",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5b1b76f9-648d-40a2-99b4-44fb250feb70",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Enabling and Disabling an Alarm Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ces.{{region}}.{{base_url}}/V1.0/{{project_id}}/quotas",
+					"protocol": "https",
+					"host": [
+						"ces",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"V1.0",
+						"{{project_id}}",
+						"quotas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Enabling and Disabling an Alarm Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7c4112c2-e98c-4cb1-80b8-05895038c3c2",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(\"Deleting an Alarm Rule\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"alarm_enabled\":false\r\n}"
+				},
+				"url": {
+					"raw": "https://ces.{{region}}.{{base_url}}/V1.0/{{project_id}}/alarms/{{alarm_id}}/action",
+					"protocol": "https",
+					"host": [
+						"ces",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"V1.0",
+						"{{project_id}}",
+						"alarms",
+						"{{alarm_id}}",
+						"action"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an Alarm Rule",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "12768ea4-9a03-4b2e-83c3-d860400b6a39",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setNextRequest(null);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ces.{{region}}.{{base_url}}/V1.0/{{project_id}}/alarms/{{alarm_id}}",
+					"protocol": "https",
+					"host": [
+						"ces",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"V1.0",
+						"{{project_id}}",
+						"alarms",
+						"{{alarm_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "830009a3-9f2e-4c99-b7aa-6b6be4f833fc",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "595ba0e0-51d9-4940-b971-fdfada26f051",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});"
+				]
+			}
+		}
+	]
+}

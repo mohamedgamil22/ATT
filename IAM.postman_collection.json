@@ -1,0 +1,165 @@
+{
+	"info": {
+		"name": "IAM",
+		"_postman_id": "c91b2ac7-534a-1c46-c957-05269fddeed6",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "IAM Get Token ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4fd6de71-22ba-46be-94f2-782a60254c9c",
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"postman.setGlobalVariable(\"X-Subject-Token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"postman.setGlobalVariable(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://iam.{{region}}.{{base_url}}:443/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"iam",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"port": "443",
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating a Shadow Domain",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{     \r\n\"domain\": {      \r\n\"name\": \"OCB0001668\", \r\n\"xfederation_type\": \"OCB0001668\", \r\n\"xfederation_id\": \"abe2291cdd674536857bcfe3c9819653\"   \r\n}\r\n}"
+				},
+				"url": {
+					"raw": "https://iam.{{region}}.{{base_url}}/v3.0/CLOUD-FEDERATION/domains",
+					"protocol": "https",
+					"host": [
+						"iam",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v3.0",
+						"CLOUD-FEDERATION",
+						"domains"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Labeling a Shadow Domain",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n    \"set\": { \r\n         \"vendor\": \"1\", \r\n         \"restricted\": \"1\" \r\n     }, \r\n     \"unset\": [  \r\n        \"legacy\", \r\n          \"vendor_sub_user\" \r\n     ], \r\n     \"domains\": [  \r\n        { \r\n             \"xfederation_id\": \"abe2291cdd674536857bcfe3c9819653\" \r\n         } \r\n     ] \r\n } \r\n"
+				},
+				"url": {
+					"raw": "https://iam.{{region}}.{{base_url}}/v3.0/CLOUD-FEDERATION/domain-role-tags",
+					"protocol": "https",
+					"host": [
+						"iam",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v3.0",
+						"CLOUD-FEDERATION",
+						"domain-role-tags"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Obtaining the Shadow Domain Token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n    \"auth\": { \r\n         \"identity\": { \r\n             \"methods\": [\"assume_role\"], \r\n             \"assume_role\": { \r\n                 \"xfederation_type\": \"ALLY_HUAWEICLOUD\", \r\n                 \"xfederation_id\": \"40367e6c32bf497cbe167d88aba704f8\", \r\n                 \"restrict\": {  \r\n                    \"roles\": [\"te_admin\"] \r\n                 } \r\n             } \r\n         }, \r\n         \"scope\": { \r\n             \"project\": { \r\n                 \"id\": \"e94ab9473abf4a1cbba80b53b737f3c8\" \r\n             } \r\n         } \r\n     } \r\n}"
+				},
+				"url": {
+					"raw": "https://iam.{{region}}.{{base_url}}/v3.0/CLOUD-FEDERATION/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"iam",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v3.0",
+						"CLOUD-FEDERATION",
+						"auth",
+						"tokens"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

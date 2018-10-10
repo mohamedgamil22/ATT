@@ -1,0 +1,467 @@
+{
+	"info": {
+		"_postman_id": "d881d760-f7d7-4adb-ba32-c8682275e8d0",
+		"name": "DIS copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "IAM Get Token ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4fd6de71-22ba-46be-94f2-782a60254c9c",
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"postman.setGlobalVariable(\"X-Subject-Token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"postman.setGlobalVariable(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://iam.{{region}}.{{base_url}}:443/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"iam",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"port": "443",
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Data",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"stream_name\": \"dis-lstream\",\"records\":[{\"data\": \"MTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTE=\",\"explicit_hash_key\": null,\"partition_key\": \"0\"}]\r\n}\r\n"
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/records",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating  Application",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"app_name\":\"app_test2\"\n}"
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/apps",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"apps"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating Checkpoints",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n   \"stream_name\":\"dis-lstream\",\r\n   \"app_name\":\"app_test\",\r\n   \"partition_id\":\"shardId-0000000000\",\r\n   \"sequence_number\":\"0\",\r\n   \"metadata\":\"metadata\",\r\n   \"checkpoint_type\":\"LAST_READ\"\r\n}"
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/checkpoints",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"checkpoints"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "list Streams",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n\"pipelineId\": \r\n\"ea20acff-9eec-409b-bb68-db5870bac755\"\r\n} \r\n"
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/streams",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"streams"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "list Stream Details",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n\"pipelineId\": \r\n\"ea20acff-9eec-409b-bb68-db5870bac755\"\r\n} \r\n"
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/streams/dis-lstream",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"streams",
+						"dis-lstream"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Getting a Cursor",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n\"pipelineId\": \r\n\"ea20acff-9eec-409b-bb68-db5870bac755\"\r\n} \r\n"
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/cursors?stream-name=dis-lstream&partition-id=0&cursor-type=AT_SEQUENCE_NUMBER&startingsequence-\nnumber=l1",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"cursors"
+					],
+					"query": [
+						{
+							"key": "stream-name",
+							"value": "dis-lstream"
+						},
+						{
+							"key": "partition-id",
+							"value": "0"
+						},
+						{
+							"key": "cursor-type",
+							"value": "AT_SEQUENCE_NUMBER"
+						},
+						{
+							"key": "startingsequence-\nnumber",
+							"value": "l1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pulling Data from a DIS Stream",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n\"pipelineId\": \r\n\"ea20acff-9eec-409b-bb68-db5870bac755\"\r\n} \r\n"
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/records?partition-cursor=eyJnZXRJdGVyYXRvclBhcmFtIjp7InN0cmVhbS1uYW1lIjoiZGlzLWxzdHJlYW0iLCJwYXJ0aXRpb24taWQiOiIwIiwiY3Vyc29yLXR5cGUiOiJBVF9TRVFVRU5DRV9OVU1CRVIiLCJzdGFydGluZy1zZXF1ZW5jZS1udW1iZXIiOiIwIn0sImdlbmVyYXRlVGltZXN0YW1wIjoxNTIwNTI1Njk5NTIzfQ",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"records"
+					],
+					"query": [
+						{
+							"key": "partition-cursor",
+							"value": "eyJnZXRJdGVyYXRvclBhcmFtIjp7InN0cmVhbS1uYW1lIjoiZGlzLWxzdHJlYW0iLCJwYXJ0aXRpb24taWQiOiIwIiwiY3Vyc29yLXR5cGUiOiJBVF9TRVFVRU5DRV9OVU1CRVIiLCJzdGFydGluZy1zZXF1ZW5jZS1udW1iZXIiOiIwIn0sImdlbmVyYXRlVGltZXN0YW1wIjoxNTIwNTI1Njk5NTIzfQ"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listing Checkpoints",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n\"pipelineId\": \r\n\"ea20acff-9eec-409b-bb68-db5870bac755\"\r\n} \r\n"
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/checkpoints?stream_name=dis-lstream&partition_id=0&app_name=app_test&checkpoint_type=LAST_READ",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"checkpoints"
+					],
+					"query": [
+						{
+							"key": "stream_name",
+							"value": "dis-lstream"
+						},
+						{
+							"key": "partition_id",
+							"value": "0"
+						},
+						{
+							"key": "app_name",
+							"value": "app_test"
+						},
+						{
+							"key": "checkpoint_type",
+							"value": "LAST_READ\n"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Getting Checkpoints",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n\"pipelineId\": \r\n\"ea20acff-9eec-409b-bb68-db5870bac755\"\r\n} \r\n"
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/checkpoints?stream_name=dis-lstream&partition_id=0&app_name=app_test&checkpoint_type=LAST_READ",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"checkpoints"
+					],
+					"query": [
+						{
+							"key": "stream_name",
+							"value": "dis-lstream"
+						},
+						{
+							"key": "partition_id",
+							"value": "0"
+						},
+						{
+							"key": "app_name",
+							"value": "app_test"
+						},
+						{
+							"key": "checkpoint_type",
+							"value": "LAST_READ"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting Application",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{X-Subject-Token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://dis.{{region}}.{{base_url}}/v2/05c9d3435d2a44669844a6f034e8796b/apps/app_test2",
+					"protocol": "https",
+					"host": [
+						"dis",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"05c9d3435d2a44669844a6f034e8796b",
+						"apps",
+						"app_test2"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

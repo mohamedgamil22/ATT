@@ -1,0 +1,402 @@
+{
+	"info": {
+		"_postman_id": "8aead3b6-0602-4076-8b96-7f5fa666c4ff",
+		"name": "IMS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Project Scope Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a6f1b4ee-505f-4440-a476-ca847426950c",
+						"type": "text/javascript",
+						"exec": [
+							"",
+							"pm.globals.set(\"token\", postman.getResponseHeader(\"X-Subject-Token\"));",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"auth\": {\r\n    \"identity\": {\r\n      \"methods\": [\"password\"],\r\n      \"password\": {\r\n        \"user\": {\r\n          \"name\": \"{{user_name}}\",\r\n          \"password\": \"{{user_password}}\",\r\n          \"domain\": {\r\n            \"name\": \"{{domain_name}}\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    \"scope\": {\r\n      \"project\": {\r\n        \"id\": \"{{tenant_id}}\"\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{auth_url}}/v3/auth/tokens",
+					"protocol": "https",
+					"host": [
+						"{{auth_url}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating Image Metadata (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e0f5ccec-7d40-47fb-b3e1-22c52cf57376",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"image_id\", jsonData.id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"__os_version\": \"OpenSUSE 42.3 64bit\",\r\n\"container_format\": \"bare\",\r\n\"disk_format\": \"qcow2\",\r\n\"min_disk\": 1,\r\n\"min_ram\": 1024,\r\n\"name\": \"TestAPIcirros-0.4.0-x86_64\",\r\n\"tags\": [\r\n\"test\",\r\n\"image\"\r\n],\r\n\"visibility\": \"private\",\r\n\"protected\": false\r\n}"
+				},
+				"url": {
+					"raw": "https://ims.{{region}}.{{base_url}}/v2/images",
+					"protocol": "https",
+					"host": [
+						"ims",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"images"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Querying Image Details (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "021642b8-014a-43ae-91bf-3e981569d421",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"__os_version\": \"OpenSUSE 42.3 64bit\",\r\n\"container_format\": \"bare\",\r\n\"disk_format\": \"vhd\",\r\n\"min_disk\": 1,\r\n\"min_ram\": 1024,\r\n\"name\": \"cirros-0.4.0-x86_64\",\r\n\"tags\": [\r\n\"test\",\r\n\"image\"\r\n],\r\n\"visibility\": \"private\",\r\n\"protected\": false\r\n}"
+				},
+				"url": {
+					"raw": "https://ims.{{region}}.{{base_url}}/v2/images/{{image_id}}",
+					"protocol": "https",
+					"host": [
+						"ims",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"images",
+						"{{image_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Uploading an Image (Native OpenStack API)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/octet-stream"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {}
+				},
+				"url": {
+					"raw": "https://ims.{{region}}.{{base_url}}/v2/images/{{image_id}}/file",
+					"protocol": "https",
+					"host": [
+						"ims",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"images",
+						"{{image_id}}",
+						"file"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check image status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1b64a733-baf6-49a4-99e2-f142dacda6de",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"",
+							"console.log(\"jsonData.status = \" + jsonData.status);",
+							"",
+							"if (jsonData.status === \"active\") {",
+							"    console.log(\"Image ready !!!\");",
+							"} else {",
+							"    console.log(\"Image not ready...\");",
+							"    // Wait few seconds before checking again",
+							"    setTimeout(function(){}, 10000);",
+							"    postman.setNextRequest(\"Check image status\");",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"__os_version\": \"OpenSUSE 42.3 64bit\",\r\n\"container_format\": \"bare\",\r\n\"disk_format\": \"vhd\",\r\n\"min_disk\": 1,\r\n\"min_ram\": 1024,\r\n\"name\": \"cirros-0.4.0-x86_64\",\r\n\"tags\": [\r\n\"test\",\r\n\"image\"\r\n],\r\n\"visibility\": \"private\",\r\n\"protected\": false\r\n}"
+				},
+				"url": {
+					"raw": "https://ims.{{region}}.{{base_url}}/v2/images/{{image_id}}",
+					"protocol": "https",
+					"host": [
+						"ims",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"images",
+						"{{image_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Image Information (Native OpenStack API) 2.0",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1cd3cb22-b6ea-4685-9a86-97388a799545",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/openstack-images-v2.0-json-patch"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[{\r\n\"replace\": \"/name\",\r\n\"value\": \"cirros-0.4.0-x86_64Updated\"\r\n}]"
+				},
+				"url": {
+					"raw": "https://ims.{{region}}.{{base_url}}/v2/images/{{image_id}}",
+					"protocol": "https",
+					"host": [
+						"ims",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"images",
+						"{{image_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Updating Image Information (Native OpenStack API) 2.1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1cd3cb22-b6ea-4685-9a86-97388a799545",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/openstack-images-v2.1-json-patch"
+					},
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[{\r\n\"op\": \"replace\",\r\n\"path\": \"/name\",\r\n\"value\": \"cirros-0.4.0-x86_64Updatedfor2ndTime\"\r\n}]"
+				},
+				"url": {
+					"raw": "https://ims.{{region}}.{{base_url}}/v2/images/{{image_id}}",
+					"protocol": "https",
+					"host": [
+						"ims",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"images",
+						"{{image_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deleting an Image (Native OpenStack API)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "11cb2f84-3b3e-43f0-8b9a-6409e9e114b7",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://ims.{{region}}.{{base_url}}/v2/images/{{image_id}}",
+					"protocol": "https",
+					"host": [
+						"ims",
+						"{{region}}",
+						"{{base_url}}"
+					],
+					"path": [
+						"v2",
+						"images",
+						"{{image_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "493ef1e9-c1cd-4dcc-8352-980ff3617b66",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "c1079433-bf57-47df-85ab-d6ed701f6065",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Successful request\", function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200,201,202,204]);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "ac8524d8-d2df-4963-b06d-b779f7676a19",
+			"key": "new.image_id",
+			"value": "4ca46bf1-5c61-48ff-b4f3-0ad4e5e3ba89",
+			"type": "string"
+		}
+	]
+}
